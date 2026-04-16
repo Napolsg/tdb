@@ -1,20 +1,9 @@
 {
-  "tasks": [
-    {
-      "id": 1776328621285,
-      "title": "Test 3",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-04-16T08:37:01.285Z",
-      "owner": "Napo"
-    }
-  ],
+  "tasks": [],
   "deletedIds": [
     "1776327292807",
     "1776328765293",
-    "1776328288143"
+    "1776328288143",
+    "1776328621285"
   ]
 }
