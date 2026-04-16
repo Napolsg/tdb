@@ -12,7 +12,7 @@ const deletedIds = new Set(Array.isArray(raw) ? [] : (raw.deletedIds || []));
 const config   = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 const now  = new Date();
-const repo = process.env.REPO_NAME || 'taskmail';
+const repo = process.env.REPO_NAME || 'tdb';
 
 function isFranceDST(date) {
   const year = date.getUTCFullYear();
