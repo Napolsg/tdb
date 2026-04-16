@@ -6,9 +6,9 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 const owner = 'napolsg';
 const repo  = 'tdb';
 
-const GMAIL_ACCOUNTS = [
-  { user: process.env.GMAIL_USER_NAPO, password: process.env.GMAIL_PASSWORD_NAPO, owner: 'Napo' },
-  { user: process.env.GMAIL_USER_BITCHOUN, password: process.env.GMAIL_PASSWORD_BITCHOUN, owner: 'Bitchoun' },
+const ACCOUNTS = [
+  { user: process.env.GMAIL_USER_NAPO,     password: process.env.GMAIL_PASSWORD_NAPO,     ownerName: 'Napo' },
+  { user: process.env.GMAIL_USER_BITCHOUN,  password: process.env.GMAIL_PASSWORD_BITCHOUN, ownerName: 'Bitchoun' },
 ];
 
 async function getTasks() {
@@ -36,6 +36,7 @@ const isSignatureLine = l => {
   if (/^\*[^*]+\*$/.test(t)) return true;
   if (/^tel[\s:]/i.test(t)) return true;
   if (/^mob[\s:]/i.test(t)) return true;
+  if (/\+?[\d\s.\-()]{8,}$/.test(t) && t.length < 25) return true;
   if (/linkedin\.com/i.test(t)) return true;
   if (/^https?:\/\//i.test(t)) return true;
   if (/^<https?:\/\//i.test(t)) return true;
@@ -49,25 +50,35 @@ function stripSignature(text) {
   return cutIdx !== -1 ? lines.slice(0, cutIdx).join('\n') : text;
 }
 
-function readEmails() {
+function readEmailsForAccount(account) {
   return new Promise((resolve, reject) => {
+    if (!account.user || !account.password) {
+      console.log(`Compte ${account.ownerName} non configuré`);
+      return resolve([]);
+    }
+
     const newTasks = [];
     const imap = new Imap({
-      user: process.env.GMAIL_USER, password: process.env.GMAIL_PASSWORD,
-      host: 'imap.gmail.com', port: 993, tls: true,
+      user: account.user,
+      password: account.password,
+      host: 'imap.gmail.com',
+      port: 993,
+      tls: true,
       tlsOptions: { rejectUnauthorized: false }
     });
 
     imap.once('ready', () => {
       imap.openBox('INBOX', false, (err) => {
         if (err) return reject(err);
-        imap.search(['UNSEEN', ['FROM', process.env.GMAIL_USER]], (err, results) => {
+        imap.search(['UNSEEN', ['FROM', account.user]], (err, results) => {
           if (err || !results || !results.length) {
-            console.log('Aucun nouvel email trouvé');
+            console.log(`Aucun nouvel email pour ${account.ownerName}`);
             imap.end(); return resolve([]);
           }
-          console.log(`${results.length} email(s) trouvé(s)`);
+
+          console.log(`${results.length} email(s) trouvé(s) pour ${account.ownerName}`);
           const f = imap.fetch(results, { bodies: '' });
+
           f.on('message', (msg) => {
             msg.on('body', (stream) => {
               simpleParser(stream, (err, mail) => {
@@ -78,27 +89,37 @@ function readEmails() {
                 if (subject.length > 0) return;
 
                 const text = mail.text || '';
-                let body = stripSignature(text);
-                const bodyLines = body.split('\n');
-                let cutIdx = bodyLines.findIndex(l => isSignatureLine(l));
-                if (cutIdx !== -1) body = bodyLines.slice(0, cutIdx).join('\n');
+                const body = stripSignature(text);
+                const lines = body.split('\n')
+                  .map(l => l.trim())
+                  .filter(l => l.length > 1 && !isSignatureLine(l));
 
-                body.split('\n').map(l => l.trim()).filter(l => l.length > 1 && !isSignatureLine(l)).forEach(line => {
-                  let priority = 'medium', title = line;
+                lines.forEach(line => {
+                  let priority = 'medium';
+                  let title = line;
                   if (line.startsWith('!')) { priority = 'high'; title = line.slice(1).trim(); }
                   if (line.startsWith('-')) { priority = 'low';  title = line.slice(1).trim(); }
                   if (title && title.length > 1) {
-                    const ownerName = (mail.from?.text || '').toLowerCase().includes('mariealix') ? 'Bitchoun' : 'Napo';
-                    newTasks.push({ id: Date.now() + Math.floor(Math.random()*1000), title, priority, project: '', done: false, created: new Date().toISOString(), owner: ownerName });
+                    newTasks.push({
+                      id: Date.now() + Math.floor(Math.random() * 1000),
+                      title, priority,
+                      project: '', done: false,
+                      created: new Date().toISOString(),
+                      owner: account.ownerName
+                    });
                   }
                 });
               });
             });
           });
-          f.once('end', () => { imap.setFlags(results, ['\\Seen'], () => imap.end()); });
+
+          f.once('end', () => {
+            imap.setFlags(results, ['\\Seen'], () => imap.end());
+          });
         });
       });
     });
+
     imap.once('end', () => resolve(newTasks));
     imap.once('error', reject);
     imap.connect();
@@ -107,10 +128,19 @@ function readEmails() {
 
 (async () => {
   try {
-    const newTasks = await readEmails();
-    if (!newTasks.length) { console.log('Aucune nouvelle tâche'); return; }
+    let allNewTasks = [];
+    for (const account of ACCOUNTS) {
+      const tasks = await readEmailsForAccount(account);
+      allNewTasks = [...allNewTasks, ...tasks];
+    }
+
+    if (!allNewTasks.length) { console.log('Aucune nouvelle tâche'); return; }
+
     const { tasks, sha, deletedIds } = await getTasks();
-    await saveTasks([...newTasks, ...tasks], sha, deletedIds);
-    console.log(`✓ ${newTasks.length} tâche(s) ajoutée(s):`, newTasks.map(t => t.title));
-  } catch(e) { console.error('Erreur:', e.message); process.exit(1); }
+    await saveTasks([...allNewTasks, ...tasks], sha, deletedIds);
+    console.log(`✓ ${allNewTasks.length} tâche(s) ajoutée(s):`, allNewTasks.map(t => t.title));
+  } catch(e) {
+    console.error('Erreur:', e.message);
+    process.exit(1);
+  }
 })();

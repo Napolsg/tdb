@@ -6,6 +6,23 @@ const allTasks = Array.isArray(raw) ? raw : (raw.tasks || []);
 const config   = fs.existsSync('config.json') ? JSON.parse(fs.readFileSync('config.json', 'utf8')) : {};
 const contacts = config.contacts || [];
 
+// Profils avec leurs contacts
+const PROFILES_DATA = {
+  napo:     { name: 'Napo',     email: process.env.GMAIL_USER_NAPO,     contacts: [{ name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN }] },
+  bitchoun: { name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN, contacts: [{ name: 'Napo',     email: process.env.GMAIL_USER_NAPO }] }
+};
+
+// Trouve l'email d'un contact par index en cherchant dans tous les profils
+function findContactEmail(idx) {
+  // D'abord dans config.json
+  if (contacts[idx] && contacts[idx].email) return contacts[idx].email;
+  // Sinon dans les profils - l'index 0 correspond au premier contact du profil de l'owner de la tâche
+  for (const profile of Object.values(PROFILES_DATA)) {
+    if (profile.contacts[idx] && profile.contacts[idx].email) return profile.contacts[idx].email;
+  }
+  return null;
+}
+
 const PROFILES = {
   napo:     { name: 'Napo',     email: process.env.GMAIL_USER_NAPO,     password: process.env.GMAIL_PASSWORD_NAPO },
   bitchoun: { name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN, password: process.env.GMAIL_PASSWORD_BITCHOUN }
@@ -97,9 +114,12 @@ function sendMail(to, subject, html, profileKey) {
     for (const task of newAssigned) {
       const match = task.assigneeRef && task.assigneeRef.match(/__(?:contact|both)_(\d+)__/);
       if (!match) continue;
-      const ct = contacts[parseInt(match[1])];
-      if (!ct || !ct.email) { console.log('Pas d\'email pour:', task.title); continue; }
-      await sendMail(ct.email, `To Do du Bonheur — Nouvelle tâche : ${task.title}`, buildHTML(task, 'assigned'));
+      const ctIdx = parseInt(match[1]);
+      const ctEmail = findContactEmail(ctIdx);
+      if (!ctEmail) { console.log('Pas d\'email pour:', task.title); continue; }
+      // Envoie depuis le compte de l'owner de la tâche
+      const senderProfile = Object.entries(PROFILES_DATA).find(([k,p]) => p.name === task.owner)?.[0] || 'napo';
+      await sendMail(ctEmail, `To Do du Bonheur — Nouvelle tâche : ${task.title}`, buildHTML(task, 'assigned'), senderProfile);
       console.log(`Notification assignation envoyée à ${ct.email} pour: ${task.title}`);
     }
   } else {

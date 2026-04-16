@@ -557,7 +557,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.8</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.9</div>
 
 <div id="toasts"></div>
 
@@ -695,12 +695,15 @@ async function syncFromGitHub(notify = false) {
     const validRemote = remote.filter(t => {
       if (deleted.has(String(t.id))) return false;
       if (!myName) return true;
-      // Tâches créées par moi
+      // Mes tâches
       if (t.owner === myName) return true;
-      // Tâches reçues et assignées à moi (assignedBy = l'autre profil)
-      if (t.assignedBy && t.owner !== myName) return true;
       // Tâches sans owner (ancien format)
-      if (!t.owner && !t.assignedBy) return true;
+      if (!t.owner) return true;
+      // Tâches d'un autre profil assignées à moi (assigneeRef non vide et owner != moi)
+      // On vérifie si cette tâche est assignée au contact qui correspond à mon profil
+      if (t.owner !== myName && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') {
+        return true; // tâche assignée à quelqu'un = visible par l'assigné
+      }
       return false;
     });
 
