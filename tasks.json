@@ -23,17 +23,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1776329645474,
-      "title": "Coucou",
-      "priority": "medium",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-04-16T08:54:05.474Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1776329619280,
       "title": "Test 1",
       "priority": "medium",
@@ -63,6 +52,7 @@
     "1776328621285",
     "1776329323628",
     "1776329302512",
-    "1776329310383"
+    "1776329310383",
+    "1776329645474"
   ]
 }
