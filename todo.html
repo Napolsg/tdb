@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon-precomposed" href="icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TDB</title>
+<title>TO DO DU BONHEUR</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -498,15 +498,6 @@ html, body {
 
 
 
-  <div class="sheet-group-label">Votre nom</div>
-  <div class="sheet-group">
-    <div class="sheet-row">
-      <label>Prénom</label>
-      <input class="sheet-input" type="text" id="owner-name" placeholder="ex: Napo">
-    </div>
-  </div>
-  <button class="sheet-btn btn-blue" onclick="saveOwnerName()">Sauvegarder le nom</button>
-
   <div class="sheet-group-label">Token GitHub</div>
   <div class="sheet-group" id="token-box">
     <div class="sheet-row">
@@ -580,7 +571,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.0</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.3</div>
 
 <div id="toasts"></div>
 
@@ -717,11 +708,14 @@ async function syncFromGitHub(notify = false) {
     const myName = profile ? profile.name : null;
     const validRemote = remote.filter(t => {
       if (deleted.has(String(t.id))) return false;
-      // Montre les tâches sans owner, ou avec owner = mon profil, ou assignées à moi
-      if (!t.owner) return true;
-      if (myName && t.owner === myName) return true;
-      if (myName && t.assignedBy && t.owner !== myName) return false;
-      return true;
+      if (!myName) return true;
+      // Tâches créées par moi
+      if (t.owner === myName) return true;
+      // Tâches reçues et assignées à moi (assignedBy = l'autre profil)
+      if (t.assignedBy && t.owner !== myName) return true;
+      // Tâches sans owner (ancien format)
+      if (!t.owner && !t.assignedBy) return true;
+      return false;
     });
 
     const merged = [...validRemote, ...localOnly];
