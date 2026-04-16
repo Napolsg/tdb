@@ -557,7 +557,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.7</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.8</div>
 
 <div id="toasts"></div>
 
@@ -782,14 +782,16 @@ function updateProfileDisplay() {
   if (!currentProfile) return;
   const profile = PROFILES[currentProfile];
   if (!profile) return;
-  // Update filter buttons with contact name
-  const ct = contacts[0];
-  if (ct) {
-    const bothBtn    = document.getElementById('filter-both-btn');
-    const contactBtn = document.getElementById('filter-contact-btn');
-    if (bothBtn)    bothBtn.textContent    = ct.name + ' et moi';
-    if (contactBtn) contactBtn.textContent = ct.name;
-  }
+  // Utilise les contacts du profil actuel
+  const ct = profile.contacts[0];
+  const bothBtn    = document.getElementById('filter-both-btn');
+  const contactBtn = document.getElementById('filter-contact-btn');
+  if (bothBtn)    bothBtn.textContent    = ct ? ct.name + ' et moi' : '';
+  if (contactBtn) contactBtn.textContent = ct ? ct.name : '';
+  // Met aussi à jour les contacts locaux
+  contacts = [...profile.contacts];
+  localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  populateAssigneeSelects();
 }
 
 function sanitize(str) {
