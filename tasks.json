@@ -1,15 +1,15 @@
 {
   "tasks": [
     {
-      "id": 1776327482701,
-      "title": "Test",
+      "id": 1776328288143,
+      "title": "Test 2",
       "priority": "medium",
       "project": "",
       "assignee": "",
-      "assigneeRef": "",
+      "assigneeRef": "__me__",
       "done": false,
-      "created": "2026-04-16T08:18:02.701Z",
-      "owner": "Napo"
+      "created": "2026-04-16T08:31:28.143Z",
+      "owner": "Bitchoun"
     }
   ],
   "deletedIds": [
