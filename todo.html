@@ -557,7 +557,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.6</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.7</div>
 
 <div id="toasts"></div>
 
@@ -1072,20 +1072,33 @@ async function syncToGitHub() {
   if (!config.ghToken) return;
   const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/tasks.json';
   try {
-    // Re-lit le SHA juste avant d'écrire pour éviter les conflits 409
     const getRes = await fetch(url, {
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
       cache: 'no-cache'
     });
     if (!getRes.ok) return;
     const getData = await getRes.json();
-    // Inclut la liste des suppressions pour sync entre appareils
-    const payload = { tasks, deletedIds: [...deleted] };
+
+    // Lit les tâches existantes sur GitHub
+    const binary = atob(getData.content.replace(/\s/g, ''));
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    const remoteTasks = Array.isArray(parsed) ? parsed : (parsed.tasks || []);
+    const remoteDeletedIds = Array.isArray(parsed) ? [] : (parsed.deletedIds || []);
+
+    // Fusionne : garde les tâches des autres profils + mes tâches mises à jour
+    const profile = PROFILES[currentProfile];
+    const myName = profile ? profile.name : null;
+    const otherTasks = remoteTasks.filter(t => myName && t.owner && t.owner !== myName);
+    const allDeleted = [...new Set([...deleted, ...remoteDeletedIds])];
+    const merged = [...tasks, ...otherTasks.filter(t => !deleted.has(String(t.id)))];
+
+    const payload = { tasks: merged, deletedIds: allDeleted };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
     const putRes = await fetch(url, {
       method: 'PUT',
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'TaskMail: mise a jour des taches', content, sha: getData.sha })
+      body: JSON.stringify({ message: 'TDB: mise a jour des taches', content, sha: getData.sha })
     });
     if (putRes.status === 409) {
       console.warn('Conflit 409 sur syncToGitHub - sera retenté');
