@@ -112,16 +112,53 @@ function sendMail(to, subject, html, profileKey) {
     );
     if (!newAssigned.length) { console.log('Aucune nouvelle tâche assignée récente'); return; }
 
+    // Verrou par tâche - évite les notifications en double
+    const { Octokit } = require('@octokit/rest');
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    let currentConfig = config;
+    let configSha = null;
+    try {
+      const { data } = await octokit.repos.getContent({ owner: 'napolsg', repo: 'tdb', path: 'config.json' });
+      configSha = data.sha;
+      currentConfig = JSON.parse(Buffer.from(data.content, 'base64').toString());
+    } catch(e) {}
+    if (!currentConfig.notifiedTasks) currentConfig.notifiedTasks = [];
+    const today = new Date().toISOString().split('T')[0];
+    // Netttoie les anciennes entrées
+    currentConfig.notifiedTasks = currentConfig.notifiedTasks.filter(n => n.date === today);
+
+    let notified = false;
     for (const task of newAssigned) {
+      const taskKey = String(task.id);
+      // Vérifie si déjà notifié aujourd'hui
+      if (currentConfig.notifiedTasks.find(n => n.id === taskKey)) {
+        console.log('Déjà notifié pour:', task.title);
+        continue;
+      }
+
       const match = task.assigneeRef && task.assigneeRef.match(/__(?:contact|both)_(\d+)__/);
       if (!match) continue;
       const ctIdx = parseInt(match[1]);
       const ctEmail = findContactEmail(ctIdx, task.owner);
       if (!ctEmail) { console.log('Pas d\'email pour:', task.title); continue; }
-      // Envoie depuis le compte de l'owner de la tâche
       const senderProfile = Object.entries(PROFILES_DATA).find(([k,p]) => p.name === task.owner)?.[0] || 'napo';
       await sendMail(ctEmail, `To Do du Bonheur — Nouvelle tâche : ${task.title}`, buildHTML(task, 'assigned'), senderProfile);
-      console.log(`Notification assignation envoyée à ${ctEmail} pour: ${task.title}`);
+      console.log(`Notification envoyée à ${ctEmail} pour: ${task.title}`);
+
+      // Enregistre dans le verrou
+      currentConfig.notifiedTasks.push({ id: taskKey, date: today });
+      notified = true;
+    }
+
+    // Sauvegarde le verrou si nécessaire
+    if (notified && configSha) {
+      try {
+        const content = Buffer.from(JSON.stringify(currentConfig, null, 2)).toString('base64');
+        await octokit.repos.createOrUpdateFileContents({
+          owner: 'napolsg', repo: 'tdb', path: 'config.json',
+          message: 'TDB: verrou notifications', content, sha: configSha
+        });
+      } catch(e) { console.warn('Verrou non enregistré:', e.message); }
     }
   } else {
     const taskId  = process.env.TASK_ID;
