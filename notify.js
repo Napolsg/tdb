@@ -12,14 +12,15 @@ const PROFILES_DATA = {
   bitchoun: { name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN, contacts: [{ name: 'Napo',     email: process.env.GMAIL_USER_NAPO }] }
 };
 
-// Trouve l'email d'un contact par index en cherchant dans tous les profils
-function findContactEmail(idx) {
-  // D'abord dans config.json
-  if (contacts[idx] && contacts[idx].email) return contacts[idx].email;
-  // Sinon dans les profils - l'index 0 correspond au premier contact du profil de l'owner de la tâche
-  for (const profile of Object.values(PROFILES_DATA)) {
-    if (profile.contacts[idx] && profile.contacts[idx].email) return profile.contacts[idx].email;
+// Trouve l'email d'un contact par index en utilisant le profil de l'owner de la tâche
+function findContactEmail(idx, taskOwner) {
+  // Cherche le profil correspondant à l'owner de la tâche
+  const ownerProfile = Object.values(PROFILES_DATA).find(p => p.name === taskOwner);
+  if (ownerProfile && ownerProfile.contacts[idx] && ownerProfile.contacts[idx].email) {
+    return ownerProfile.contacts[idx].email;
   }
+  // Fallback dans config.json
+  if (contacts[idx] && contacts[idx].email) return contacts[idx].email;
   return null;
 }
 
@@ -115,7 +116,7 @@ function sendMail(to, subject, html, profileKey) {
       const match = task.assigneeRef && task.assigneeRef.match(/__(?:contact|both)_(\d+)__/);
       if (!match) continue;
       const ctIdx = parseInt(match[1]);
-      const ctEmail = findContactEmail(ctIdx);
+      const ctEmail = findContactEmail(ctIdx, task.owner);
       if (!ctEmail) { console.log('Pas d\'email pour:', task.title); continue; }
       // Envoie depuis le compte de l'owner de la tâche
       const senderProfile = Object.entries(PROFILES_DATA).find(([k,p]) => p.name === task.owner)?.[0] || 'napo';
