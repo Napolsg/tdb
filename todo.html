@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="TaskMail">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon-precomposed" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TDB</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: #F2F2F7;
+  color: #1C1C1E;
+  font-family: 'Outfit', -apple-system, sans-serif;
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* -- HEADER -- */
+.header {
+  padding: 20px 20px 12px;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 50%, #6BCB77 100%);
+}
+.app-title { color: white !important; }
+.hbtn { background: rgba(255,255,255,0.25) !important; color: white !important; box-shadow: none !important; }
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+.app-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1C1C1E;
+  letter-spacing: -0.5px;
+}
+.header-actions { display: flex; gap: 8px; }
+.hbtn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: transform 0.1s;
+}
+.hbtn:active { transform: scale(0.92); }
+
+
+
+
+
+
+/* -- FILTERS -- */
+.filters {
+  display: flex;
+  gap: 7px;
+  padding: 16px 20px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filters::-webkit-scrollbar { display: none; }
+.fbtn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  background: white;
+  color: #3C3C43;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: all 0.15s;
+}
+.fbtn.active { background: #FF6B6B; color: white; box-shadow: 0 2px 8px rgba(255,107,107,0.35); }
+.fbtn:active { transform: scale(0.95); }
+
+
+
+/* -- TASK LIST -- */
+.task-list {
+  padding: 0 20px 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.task-group {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom: 10px;
+}
+
+/* -- TASK ROW -- */
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-bottom: 1px solid #F2F2F7;
+  transition: background 0.1s;
+  animation: rowIn 0.2s ease;
+}
+@keyframes rowIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.task-row:last-child { border-bottom: none; }
+.task-row:active { background: #F9F9F9; }
+.task-row.done { opacity: 0.45; }
+.task-row.done .task-title { text-decoration: line-through; color: #8E8E93; }
+
+.cb {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid #C7C7CC;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.75rem;
+  color: white;
+  background: white;
+}
+.cb:active { transform: scale(0.85); }
+.cb.checked { background: #34C759; border-color: #34C759; }
+
+.priority-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pd-high   { background: #FF3B30; }
+.pd-medium { background: #FF9500; }
+.pd-low    { background: #34C759; }
+
+.task-body { flex: 1; min-width: 0; }
+.task-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #1C1C1E;
+  line-height: 1.3;
+}
+.task-project {
+  font-size: 0.72rem;
+  color: #8E8E93;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.edit-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: #F2F2F7;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  color: #8E8E93;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.edit-btn:active { background: #E5E5EA; color: #007AFF; }
+
+/* -- EMPTY -- */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8E8E93;
+}
+.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-title { font-size: 1rem; font-weight: 600; color: #3C3C43; margin-bottom: 4px; }
+.empty-sub { font-size: 0.82rem; }
+
+/* -- ADD BAR -- */
+.add-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: linear-gradient(180deg, rgba(255,245,245,0.97) 0%, rgba(255,235,180,0.99) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,107,107,0.15);
+  padding: 12px 20px 32px;
+  z-index: 50;
+}
+.add-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.add-input {
+  flex: 1;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.92rem;
+  color: #1C1C1E;
+  outline: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.add-input::placeholder { color: #C7C7CC; }
+.add-btn {
+  width: 44px; height: 44px;
+  background: #FF6B6B;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.add-btn:active { transform: scale(0.93); opacity: 0.85; }
+.add-opts { display: flex; gap: 8px; }
+.add-sel {
+  flex: 1;
+  background: white;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem;
+  color: #3C3C43;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+/* -- BOTTOM SHEET -- */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  display: none;
+  backdrop-filter: blur(4px);
+}
+.overlay.open { display: block; }
+
+.sheet {
+  position: fixed;
+  bottom: 0; left: 50%;
+  width: 100%; max-width: 430px;
+  background: #F2F2F7;
+  border-radius: 20px 20px 0 0;
+  padding-bottom: 34px;
+  z-index: 101;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateX(-50%) translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sheet.open { transform: translateX(-50%) translateY(0); }
+
+.sheet-handle { width: 36px; height: 4px; background: #C7C7CC; border-radius: 2px; margin: 10px auto 0; }
+.sheet-header {
+  padding: 14px 20px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sheet-title { font-size: 1.05rem; font-weight: 700; color: #1C1C1E; }
+.sheet-close {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #E5E5EA;
+  border: none;
+  color: #8E8E93;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif;
+}
+.sheet-close:active { background: #D1D1D6; }
+
+/* Sheet groups */
+.sheet-group {
+  background: white;
+  border-radius: 14px;
+  margin: 0 16px 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.sheet-group-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0 16px 6px;
+  margin-top: 4px;
+}
+.sheet-row {
+  padding: 12px 14px;
+  border-bottom: 1px solid #F2F2F7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sheet-row:last-child { border-bottom: none; }
+.sheet-row label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sheet-input {
+  background: transparent;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.92rem;
+  color: #1C1C1E;
+  outline: none;
+  width: 100%;
+  padding: 0;
+}
+.sheet-input::placeholder { color: #C7C7CC; }
+
+.sheet-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.1s;
+  text-align: center;
+}
+.sheet-btn:active { opacity: 0.75; }
+.btn-blue { background: #FF6B6B; color: white; }
+.btn-green { background: #34C759; color: white; }
+.btn-red { background: #FF3B30; color: white; }
+.btn-gray { background: #E5E5EA; color: #3C3C43; }
+
+/* chips */
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
+.chip {
+  display: flex; align-items: center; gap: 5px;
+  background: #EAF3FF; color: #007AFF;
+  border-radius: 20px; padding: 5px 10px;
+  font-size: 0.78rem; font-weight: 600;
+}
+.chip-x { background: none; border: none; color: #007AFF; cursor: pointer; font-size: 0.8rem; opacity: 0.6; padding: 0; }
+.chip-x:active { opacity: 1; }
+
+.time-row { display: flex; gap: 8px; padding: 10px 14px; }
+.time-inp {
+  flex: 1;
+  background: #F2F2F7; border: none; border-radius: 10px;
+  padding: 9px 12px; font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem; color: #1C1C1E; outline: none;
+}
+.time-add-btn {
+  background: #007AFF; color: white; border: none;
+  border-radius: 10px; padding: 9px 16px;
+  font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+  font-weight: 700; cursor: pointer;
+}
+.time-add-btn:active { opacity: 0.8; }
+
+/* log */
+.log-wrap { padding: 8px 14px; display: flex; flex-direction: column; gap: 3px; max-height: 100px; overflow-y: auto; }
+.log-r { font-size: 0.7rem; color: #8E8E93; padding: 3px 0; }
+.log-r.sent { color: #34C759; }
+.log-r.sim  { color: #FF9500; }
+.log-r.err  { color: #FF3B30; }
+
+/* -- EDIT SHEET -- */
+.edit-sel {
+  background: transparent; border: none;
+  font-family: 'Outfit', sans-serif; font-size: 0.92rem;
+  color: #1C1C1E; outline: none; width: 100%; padding: 0;
+  appearance: none; -webkit-appearance: none;
+}
+
+/* -- TOAST -- */
+#toasts {
+  position: fixed; top: 60px;
+  left: 50%; transform: translateX(-50%);
+  width: calc(100% - 40px); max-width: 390px;
+  z-index: 999; display: flex; flex-direction: column; gap: 6px;
+  pointer-events: none;
+}
+.toast {
+  padding: 11px 16px; border-radius: 14px;
+  font-size: 0.83rem; font-weight: 600;
+  background: rgba(28,28,30,0.88);
+  color: white;
+  backdrop-filter: blur(10px);
+  animation: toastIn 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+.toast.ok  { background: rgba(52,199,89,0.92); }
+.toast.err { background: rgba(255,59,48,0.92); }
+.toast.info { background: rgba(0,122,255,0.92); }
+</style>
+</head>
+<body>
+
+<!-- PROFILE SELECTOR -->
+<div id="profile-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:20px; padding:28px 24px; width:calc(100% - 48px); max-width:380px; margin:0 auto;">
+    <div style="font-size:1.4rem; font-weight:800; color:#1C1C1E; margin-bottom:6px;">La To Do du Bonheur</div>
+    <div style="font-size:0.85rem; color:#8E8E93; margin-bottom:24px;">Qui es-tu ?</div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button onclick="selectProfile('napo')" style="background:linear-gradient(135deg,#FF6B6B,#FFD93D); color:white; border:none; border-radius:14px; padding:16px; font-size:1rem; font-weight:800; cursor:pointer;">🙋 Napo</button>
+      <button onclick="selectProfile('bitchoun')" style="background:linear-gradient(135deg,#FFD93D,#6BCB77); color:white; border:none; border-radius:14px; padding:16px; font-size:1rem; font-weight:800; cursor:pointer;">🙋 Bitchoun</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+<div class="app-title" style="text-transform:uppercase; letter-spacing:1px; font-size:1.4rem;">La To Do du Bonheur</div>
+    <div class="header-actions">
+      <button class="hbtn" onclick="location.reload(true)" title="Rafraîchir">🔄</button>
+      <button class="hbtn" onclick="showProfileSelector()" title="Changer de profil">👤</button>
+      <button class="hbtn" onclick="openSettings()">⚙️</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- HIDDEN STATS FOR JS -->
+<div style="display:none">
+  <span id="s-total"></span><span id="s-done"></span><span id="s-high"></span>
+  <span id="subtitle"></span><span id="section-head"></span>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="fbtn active" onclick="setFilter('all',this)">Toutes</button>
+  <button class="fbtn" onclick="setFilter('me',this)">Moi</button>
+  <button class="fbtn" id="filter-both-btn" onclick="setFilter('both',this)"></button>
+  <button class="fbtn" id="filter-contact-btn" onclick="setFilter('contact',this)"></button>
+</div>
+
+<!-- TASKS -->
+<div id="sync-indicator" style="display:none; text-align:center; padding:8px; font-size:0.78rem; color:#8E8E93;">
+  ⏳ Vérification des emails…
+</div>
+<div id="done-bar" style="display:none; padding:4px 20px 8px; text-align:right;">
+  <button onclick="clearDone()" style="background:none; border:none; font-size:0.78rem; color:#FF3B30; cursor:pointer; font-family:'Outfit',sans-serif; font-weight:600;">🗑 Supprimer les tâches faites</button>
+</div>
+<div class="task-list" id="task-list"></div>
+
+<!-- ADD BAR -->
+<div class="add-bar">
+  <div class="add-row">
+    <input class="add-input" id="new-title" type="text" placeholder="Nouvelle tâche…" onkeydown="if(event.key==='Enter') addTask()">
+    <button class="add-btn" onclick="addTask()">＋</button>
+  </div>
+  <div class="add-opts">
+    <select class="add-sel" id="new-priority">
+      <option value="medium">🟡 Moyen</option>
+      <option value="high">🔴 Urgent</option>
+      <option value="low">🟢 Faible</option>
+    </select>
+    <input class="add-sel" type="text" id="new-project" placeholder="Projet…" style="font-size:0.82rem; flex:1; min-width:0;">
+    <select class="add-sel" id="new-assignee" style="font-size:0.82rem; flex:1; min-width:0;" onchange="onAssigneeChange(this)"></select>
+  </div>
+  <div id="add-bar-contact-form" style="display:none; margin-top:8px; padding:12px; background:white; border-radius:10px; border:1px solid #E8E8E4;">
+    <div style="font-size:0.75rem; font-weight:700; color:#6C6C68; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Nouveau contact</div>
+    <input type="text" id="add-contact-name" placeholder="Nom" style="width:100%; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:8px; padding:9px 10px; font-size:0.85rem; color:#1C1C1E; outline:none; margin-bottom:6px;">
+    <input type="email" id="add-contact-email" placeholder="email@exemple.com" style="width:100%; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:8px; padding:9px 10px; font-size:0.85rem; color:#1C1C1E; outline:none; margin-bottom:6px;">
+    <input type="hidden" id="add-contact-type" value="email">
+    <input type="hidden" id="add-contact-repo" value="">
+    <button onclick="saveContactForm()" style="width:100%; background:#1C1C1E; color:white; border:none; border-radius:8px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">Ajouter</button>
+  </div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div class="overlay" id="s-overlay" onclick="closeSettings()"></div>
+<div class="sheet" id="s-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Paramètres</span>
+    <button class="sheet-close" onclick="closeSettings()">✕</button>
+  </div>
+
+
+
+  <div class="sheet-group-label">Votre nom</div>
+  <div class="sheet-group">
+    <div class="sheet-row">
+      <label>Prénom</label>
+      <input class="sheet-input" type="text" id="owner-name" placeholder="ex: Napo">
+    </div>
+  </div>
+  <button class="sheet-btn btn-blue" onclick="saveOwnerName()">Sauvegarder le nom</button>
+
+  <div class="sheet-group-label">Token GitHub</div>
+  <div class="sheet-group" id="token-box">
+    <div class="sheet-row">
+      <label>Token</label>
+      <input class="sheet-input" type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+  </div>
+  <button class="sheet-btn btn-blue" id="save-btn" onclick="saveConfig()">Sauvegarder le token</button>
+
+  <div class="sheet-group-label">Contacts</div>
+  <div class="sheet-group" id="contacts-list"></div>
+  <button class="sheet-btn btn-gray" onclick="openAddContact()">+ Ajouter un contact</button>
+
+  <div id="contact-edit-form" style="display:none; margin:0 16px 12px; background:white; border-radius:14px; border:0.5px solid #E8E8E4; padding:14px;">
+    <div style="font-size:0.7rem; font-weight:700; color:#8E8E93; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px;" id="contact-form-title">Nouveau contact</div>
+    <input type="hidden" id="editing-contact-idx" value="-1">
+    <input class="sheet-input" type="text" id="cf-name" placeholder="Nom" style="margin-bottom:6px;">
+    <input class="sheet-input" type="email" id="cf-email" placeholder="email@exemple.com" style="margin-bottom:6px;">
+    <input class="sheet-input" type="text" id="cf-repo" placeholder="Dépôt GitHub (ex: tdb) — optionnel" style="margin-bottom:6px;">
+        <div style="display:flex; gap:6px;">
+      <button onclick="saveContactForm()" style="flex:1; background:#1C1C1E; color:white; border:none; border-radius:9px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">Enregistrer</button>
+      <button onclick="cancelContactForm()" style="flex:1; background:#F2F2F7; color:#3C3C43; border:none; border-radius:9px; padding:10px; font-size:0.85rem; font-weight:600; cursor:pointer;">Annuler</button>
+    </div>
+  </div>
+
+  <div class="sheet-group-label">Horaires d'envoi (heure de Paris)</div>
+  <div class="sheet-group">
+    <div id="schedule-chips" style="display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; min-height:20px;"></div>
+    <div style="display:flex; gap:8px; padding:0 14px 12px; align-items:center;">
+      <input type="time" id="new-schedule" value="08:00" style="flex:1; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:9px; padding:9px 12px; font-size:0.85rem; color:#1C1C1E; outline:none;">
+      <button onclick="addScheduleConfig()" style="background:#1C1C1E; color:white; border:none; border-radius:9px; padding:9px 16px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT OVERLAY -->
+<div class="overlay" id="e-overlay" onclick="closeEdit()"></div>
+<div class="sheet" id="e-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Modifier</span>
+    <button class="sheet-close" onclick="closeEdit()">✕</button>
+  </div>
+  <div class="sheet-group">
+    <div class="sheet-row"><label>Titre</label><input class="sheet-input" type="text" id="e-title" placeholder="Titre de la tâche"></div>
+    <div class="sheet-row">
+      <label>Priorité</label>
+      <select class="edit-sel" id="e-priority">
+        <option value="medium">🟡 Priorité moyenne</option>
+        <option value="high">🔴 Urgent</option>
+        <option value="low">🟢 Faible</option>
+      </select>
+    </div>
+    <div class="sheet-row"><label>Projet</label><input class="sheet-input" type="text" id="e-project" placeholder="Nom du projet"></div>
+    <div class="sheet-row" style="gap:6px;">
+      <label>Assigner à</label>
+      <select class="sheet-input" id="e-assignee" style="padding:6px 8px;" onchange="onAssigneeChange(this)"></select>
+    </div>
+    <div id="inline-contact-form" style="display:none; padding:10px 14px; background:#F2F2F7; border-radius:8px; margin:0 0 8px; gap:6px; flex-direction:column;">
+      <input class="sheet-input" type="text" id="contact-name" placeholder="Nom du contact" style="margin-bottom:6px;">
+      <select id="contact-type" class="sheet-input" style="margin-bottom:6px;">
+        <option value="repo">Dépôt GitHub</option>
+        <option value="email">Email</option>
+      </select>
+      <input class="sheet-input" type="text" id="contact-repo" placeholder="ex: tdb" style="margin-bottom:0;">
+      <input class="sheet-input" type="email" id="contact-email" placeholder="email@exemple.com" style="display:none;">
+      <button onclick="saveContactForm()" style="background:#1C1C1E;color:white;border:none;border-radius:8px;padding:8px;font-size:0.82rem;font-weight:700;cursor:pointer;margin-top:2px;">Ajouter le contact</button>
+    </div>
+  </div>
+  <button class="sheet-btn btn-blue" onclick="saveEdit()">Enregistrer</button>
+  <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
+</div>
+
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.0</div>
+
+<div id="toasts"></div>
+
+<script>
+window.emailjs = { init:function(){}, send:function(){ return Promise.reject({text:'EmailJS non configuré'}); } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" onerror="console.warn('EmailJS CDN indisponible')"></script>
+<script>
+const owner = 'napolsg';
+const repo  = 'tdb';
+
+const PROFILES = {
+  napo: {
+    name: 'Napo',
+    email: 'l.lassus87@gmail.com',
+    contacts: [{ name: 'Bitchoun', repo: 'tdb', email: 'mariealix.delassus@gmail.com', both: true }]
+  },
+  bitchoun: {
+    name: 'Bitchoun',
+    email: 'mariealix.delassus@gmail.com',
+    contacts: [{ name: 'Napo', repo: 'tdb', email: 'l.lassus87@gmail.com', both: true }]
+  }
+};
+
+let config    = JSON.parse(localStorage.getItem('tdb_config')    || '{}');
+let tasks     = JSON.parse(localStorage.getItem('tdb_tasks')     || '[]');
+let schedules = JSON.parse(localStorage.getItem('tdb_schedules') || '["08:00","18:00"]');
+let log       = JSON.parse(localStorage.getItem('tdb_log')       || '[]');
+let deleted   = new Set(JSON.parse(localStorage.getItem('tdb_deleted') || '[]'));
+let currentProfile = localStorage.getItem('tdb_profile') || null;
+let contacts  = JSON.parse(localStorage.getItem('tdb_contacts') || 'null') || 
+  (currentProfile && PROFILES[currentProfile] ? PROFILES[currentProfile].contacts : []);
+let filter    = 'all';
+let editingId = null;
+let lastMin   = null;
+
+async function init() {
+  if (config.to && document.getElementById('ejs-to'))       document.getElementById('ejs-to').value       = config.to;
+  if (config.ghToken   && document.getElementById('gh-token'))   document.getElementById('gh-token').value   = config.ghToken;
+  if (config.ownerName && document.getElementById('owner-name')) document.getElementById('owner-name').value = config.ownerName;
+
+  // Initialise les labels des filtres avec le contact par défaut
+  const defCt = contacts[0];
+  if (defCt) {
+    const bothBtn    = document.getElementById('filter-both-btn');
+    const contactBtn = document.getElementById('filter-contact-btn');
+    if (bothBtn)    bothBtn.textContent    = defCt.name + ' et moi';
+    if (contactBtn) contactBtn.textContent = defCt.name;
+  }
+
+  // Affiche le sélecteur de profil si pas encore choisi
+  if (!currentProfile) {
+    showProfileSelector();
+  } else {
+    updateProfileDisplay();
+  }
+
+  // Affiche la liste immédiatement
+  render();
+
+  // Déclenche fetch-and-send en arrière-plan
+  const ind = document.getElementById('sync-indicator');
+  if (ind) ind.style.display = 'block';
+  await triggerFetchTasks();
+  await new Promise(r => setTimeout(r, 5000));
+  await syncFromGitHub(true);
+  // Pousse les tâches assignées sans écraser tasks.json local
+  if (ind) ind.style.display = 'none';
+
+  // Pas de tâches par défaut
+
+  setInterval(tickClock, 1000);
+  setInterval(checkSchedules, 15000);
+  // Sync depuis GitHub toutes les 2 minutes (silencieuse)
+  setInterval(() => syncFromGitHub(false), 120000);
+  tickClock(); checkSchedules();
+}
+
+async function triggerFetchTasks() {
+  if (!config.ghToken) return;
+
+  // Ne déclenche pas si lancé il y a moins de 5 minutes
+  const lastTrigger = parseInt(localStorage.getItem('tdb_last_trigger') || '0');
+  const now = Date.now();
+  if (now - lastTrigger < 5 * 60 * 1000) {
+    console.log('Fetch-tasks ignoré (lancé il y a moins de 5 min)');
+    return;
+  }
+  localStorage.setItem('tdb_last_trigger', String(now));
+
+  try {
+    await fetch('https://api.github.com/repos/napolsg/tdb/actions/workflows/fetch-and-send.yml/dispatches', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'token ' + sanitize(config.ghToken),
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ref: 'main' })
+    });
+    console.log('Workflow fetch-and-send déclenché');
+  } catch(e) {
+    console.warn('Déclenchement workflow échoué:', e.message);
+  }
+}
+
+async function syncFromGitHub(notify = false) {
+  if (!config.ghToken) return;
+  try {
+    const url = 'https://api.github.com/repos/napolsg/tdb/contents/tasks.json';
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const binary = atob(data.content.replace(/\s/g, ''));
+    const bytes  = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    const remote        = Array.isArray(parsed) ? parsed : (parsed.tasks || []);
+    const remoteDeleted = Array.isArray(parsed) ? [] : (parsed.deletedIds || []);
+
+    // Fusionne les suppressions
+    remoteDeleted.forEach(id => deleted.add(String(id)));
+    localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
+
+    // GitHub est la source de vérité
+    const remoteIds = new Set(remote.map(t => String(t.id)));
+    const localOnly = tasks.filter(t => !remoteIds.has(String(t.id)) && !deleted.has(String(t.id)));
+
+    // Tâches remote filtrées des supprimées et filtrées par profil
+    const profile = PROFILES[currentProfile];
+    const myName = profile ? profile.name : null;
+    const validRemote = remote.filter(t => {
+      if (deleted.has(String(t.id))) return false;
+      // Montre les tâches sans owner, ou avec owner = mon profil, ou assignées à moi
+      if (!t.owner) return true;
+      if (myName && t.owner === myName) return true;
+      if (myName && t.assignedBy && t.owner !== myName) return false;
+      return true;
+    });
+
+    const merged = [...validRemote, ...localOnly];
+    const prev   = JSON.stringify(tasks);
+    tasks = merged;
+    localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
+
+    if (JSON.stringify(tasks) !== prev) {
+      render();
+      if (notify) toast('Tâches synchronisées', 'ok');
+    }
+  } catch(e) {
+    console.warn('Sync depuis GitHub échoué:', e.message);
+  }
+}
+
+function tickClock() {
+  const n = new Date();
+  const h = n.getHours().toString().padStart(2,'0');
+  const m = n.getMinutes().toString().padStart(2,'0');
+  const active = tasks.filter(t => !t.done).length;
+  const _sub = document.getElementById('subtitle'); if(_sub) _sub.textContent =
+    `${h}:${m}  ·  ${active} tâche${active !== 1 ? 's' : ''} en cours`;
+}
+
+function checkSchedules() {
+  const n    = new Date();
+  const hhmm = n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
+  const min  = n.getHours() * 60 + n.getMinutes();
+  if (schedules.includes(hhmm) && lastMin !== min) { lastMin = min; sendEmail('auto'); }
+  updateNextSend();
+}
+
+function updateNextSend() { /* désactivé */ }
+
+function showProfileSelector() {
+  const el = document.getElementById('profile-overlay');
+  if (el) el.style.display = 'flex';
+}
+
+function selectProfile(profileKey) {
+  const profile = PROFILES[profileKey];
+  if (!profile) return;
+  
+  currentProfile = profileKey;
+  localStorage.setItem('tdb_profile', profileKey);
+  
+  // Set owner name
+  config.ownerName = profile.name;
+  localStorage.setItem('tdb_config', JSON.stringify(config));
+  
+  // Set contacts from profile if not already set
+  if (!localStorage.getItem('tdb_contacts')) {
+    contacts = profile.contacts;
+    localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  }
+  
+  // Hide selector
+  const el = document.getElementById('profile-overlay');
+  if (el) el.style.display = 'none';
+  
+  // Update UI
+  updateProfileDisplay();
+  render();
+  populateAssigneeSelects();
+  
+  toast('Bonjour ' + profile.name + ' !', 'ok');
+}
+
+function updateProfileDisplay() {
+  if (!currentProfile) return;
+  const profile = PROFILES[currentProfile];
+  if (!profile) return;
+  // Update filter buttons with contact name
+  const ct = contacts[0];
+  if (ct) {
+    const bothBtn    = document.getElementById('filter-both-btn');
+    const contactBtn = document.getElementById('filter-contact-btn');
+    if (bothBtn)    bothBtn.textContent    = ct.name + ' et moi';
+    if (contactBtn) contactBtn.textContent = ct.name;
+  }
+}
+
+function sanitize(str) {
+  // Garde uniquement les caractères ASCII valides pour les headers HTTP
+  return (str || '').replace(/[^ -~]/g, '').trim();
+}
+
+function saveOwnerName() {
+  config.ownerName = (document.getElementById('owner-name')?.value || '').trim();
+  localStorage.setItem('tdb_config', JSON.stringify(config));
+  saveConfigToGitHub();
+  toast('Nom sauvegardé', 'ok');
+}
+
+function saveConfig() {
+  config = {
+    ...config,
+    ghToken: sanitize(document.getElementById('gh-token') ? document.getElementById('gh-token').value : (config.ghToken || '')),
+  };
+  localStorage.setItem('tdb_config', JSON.stringify(config));
+  toast('Configuration sauvegardée', 'ok');
+  updateTokenUI();
+}
+
+function updateTokenUI() {
+  const box  = document.getElementById('token-box');
+  const btn  = document.getElementById('save-btn');
+  if (!box || !btn) return;
+  if (config.ghToken) {
+    box.style.display = 'none';
+    btn.textContent = 'Changer le token';
+    btn.onclick = showTokenInput;
+  } else {
+    box.style.display = 'block';
+    btn.textContent = 'Sauvegarder';
+    btn.onclick = saveConfig;
+  }
+}
+
+function showTokenInput() {
+  const box = document.getElementById('token-box');
+  const btn = document.getElementById('save-btn');
+  if (!box || !btn) return;
+  box.style.display = 'block';
+  document.getElementById('gh-token').value = '';
+  btn.textContent = 'Sauvegarder';
+  btn.onclick = saveConfig;
+}
+
+function sendMailto() {
+  const to = config.to || document.getElementById('ejs-to').value.trim();
+  if (!to) { toast('Renseigne une adresse email destinataire', 'err'); return; }
+  const pending = tasks.filter(t => !t.done);
+  if (!pending.length) { toast('Aucune tâche en attente', 'info'); return; }
+  const pLabel = { high:'URGENT', medium:'Moyen', low:'Faible' };
+  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' -- '+t.project:''}`).join('\n');
+  const timeStr = new Date().toLocaleString('fr-FR');
+  const subject = encodeURIComponent(`TaskMail -- ${pending.length} tâche(s) à faire`);
+  const body    = encodeURIComponent(`Bonjour,\n\nVos tâches du ${timeStr} :\n\n${lines}\n\n-- TaskMail`);
+  const a = document.createElement('a');
+  a.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => document.body.removeChild(a), 200);
+  addLog({ time: timeStr, status:'sent', count: pending.length });
+  toast(`Email préparé -- ${pending.length} tâche(s)`, 'ok');
+}
+
+async function sendEmail(mode) {
+  const pending = tasks.filter(t => !t.done);
+  if (!pending.length) { if (mode !== 'auto') toast('Aucune tâche en attente', 'info'); return; }
+  const pLabel = { high:'URGENT', medium:'Moyen', low:'Faible' };
+  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' -- '+t.project:''}`).join('\n');
+  const timeStr = new Date().toLocaleString('fr-FR');
+  if (!config.service || !config.template || !config.pubkey || !config.to) {
+    addLog({ time:timeStr, status:'sim', count:pending.length });
+    if (mode !== 'auto') toast('Mode simulation -- configurez EmailJS', 'info');
+    return;
+  }
+  try {
+    await emailjs.send(config.service, config.template, {
+      to_email:config.to, send_time:timeStr,
+      task_count:pending.length, task_list:lines,
+      subject:`TaskMail -- ${pending.length} tâche(s) à faire`,
+    });
+    addLog({ time:timeStr, status:'sent', count:pending.length });
+    toast(`Email envoyé (${pending.length} tâches)`, 'ok');
+  } catch(e) {
+    addLog({ time:timeStr, status:'error', msg:e.text||e.message });
+    toast('Erreur : '+(e.text||e.message), 'err');
+  }
+}
+
+function sendNow() { sendEmail('manual'); }
+
+function addLog(e) {
+  log.unshift(e); if (log.length > 20) log.pop();
+  localStorage.setItem('tdb_log', JSON.stringify(log));
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('log-wrap');
+  if (!el) return;
+  if (!log.length) { el.innerHTML = '<div class="log-r">Aucun envoi</div>'; return; }
+  el.innerHTML = log.map(e =>
+    e.status==='sent'  ? `<div class="log-r sent">✓ ${e.time} · ${e.count} tâches</div>` :
+    e.status==='sim'   ? `<div class="log-r sim">○ ${e.time} · simulation</div>` :
+                         `<div class="log-r err">✕ ${e.time} · ${e.msg}</div>`
+  ).join('');
+}
+
+function addSchedule() {
+  const v = document.getElementById('new-time').value;
+  if (!v || schedules.includes(v)) { if(schedules.includes(v)) toast('Déjà ajouté','info'); return; }
+  schedules.push(v); schedules.sort();
+  localStorage.setItem('tdb_schedules', JSON.stringify(schedules));
+  renderChips(); updateNextSend();
+  toast(`Horaire ${v} ajouté`, 'ok');
+}
+
+function removeSchedule(v) {
+  schedules = schedules.filter(s => s !== v);
+  localStorage.setItem('tdb_schedules', JSON.stringify(schedules));
+  renderChips(); updateNextSend();
+}
+
+function renderChips() {
+  const el = document.getElementById('chip-list');
+  if (!el) return; // element removed from UI
+  if (!schedules.length) { el.innerHTML = '<span style="font-size:0.78rem;color:#C7C7CC;padding:2px">Aucun horaire</span>'; return; }
+  el.innerHTML = schedules.map(s =>
+    `<div class="chip">${s}<button class="chip-x" onclick="removeSchedule('${s}')">✕</button></div>`
+  ).join('');
+}
+
+function addTask() {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) return;
+  const profile = PROFILES[currentProfile];
+  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(document.getElementById('new-assignee').value), assigneeRef: document.getElementById('new-assignee').value, done:false, created:new Date().toISOString(), owner: profile ? profile.name : '' });
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-project').value = '';
+  document.getElementById('new-assignee').value = '';
+  save(); renderTasks(); updateStats(); tickClock();
+  const newTask = tasks[0];
+  if (newTask && newTask.assigneeRef && newTask.assigneeRef.startsWith('__contact_')) {
+    // Attend 5s que tasks.json soit bien uploadé sur GitHub avant d'envoyer la notif
+  }
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id===id);
+  if (t) {
+    t.done = !t.done;
+    save(); renderTasks(); updateStats(); tickClock();
+    if (t.assignedBy) {
+      // Sync le statut done vers le dépôt de l'assigneur
+      syncTaskStatusToAssigner(t);
+    }
+    if (t.done && t.assignedBy) {
+      scheduleSyncToGitHub().then(() => triggerCompletionNotification(t));
+    }
+
+  }
+}
+
+async function syncTaskStatusToAssigner(task) {
+  if (!config.ghToken || !task.assignedBy) return;
+  const targetRepo = task.assignedBy;
+  try {
+    const url = 'https://api.github.com/repos/napolsg/' + targetRepo + '/contents/tasks.json';
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const binary = atob(data.content.replace(/\s/g, ''));
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    const remoteTasks = Array.isArray(parsed) ? parsed : (parsed.tasks || []);
+    const remoteDeleted = Array.isArray(parsed) ? [] : (parsed.deletedIds || []);
+
+    // Trouve la tâche correspondante chez l'assigneur
+    const remoteTask = remoteTasks.find(t => String(t.id) === String(task.id));
+    if (!remoteTask) return;
+
+    // Met à jour le statut done
+    remoteTask.done = task.done;
+
+    const payload = { tasks: remoteTasks, deletedIds: remoteDeleted };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + sanitize(config.ghToken),
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'TaskMail: mise a jour statut tache',
+        content,
+        sha: data.sha
+      })
+    });
+    console.log('Statut tache sync vers ' + targetRepo);
+  } catch(e) {
+    console.warn('Sync statut echoue:', e.message);
+  }
+}
+
+function openEdit(id) {
+  const t = tasks.find(t => t.id===id);
+  if (!t) return;
+  editingId = id;
+  document.getElementById('e-title').value    = t.title;
+  document.getElementById('e-priority').value = t.priority;
+  document.getElementById('e-project').value  = t.project || '';
+  populateAssigneeSelects();
+  const eAssign = document.getElementById('e-assignee');
+  if (eAssign) {
+    eAssign.value = t.assigneeRef || t.assignee || '';
+  }
+  const form = document.getElementById('inline-contact-form');
+  if (form) form.style.display = 'none';
+  document.getElementById('e-overlay').classList.add('open');
+  document.getElementById('e-sheet').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('e-overlay').classList.remove('open');
+  document.getElementById('e-sheet').classList.remove('open');
+  editingId = null;
+}
+
+function saveEdit() {
+  const t = tasks.find(t => t.id===editingId);
+  if (!t) return;
+  t.title    = document.getElementById('e-title').value.trim() || t.title;
+  t.priority = document.getElementById('e-priority').value;
+  t.project  = document.getElementById('e-project').value.trim();
+  t.assignee    = getAssigneeEmail(document.getElementById('e-assignee')?.value || '');
+  t.assigneeRef = document.getElementById('e-assignee')?.value || '';
+  const prevAssignee = (tasks.find(t => t.id === editingId) || {}).assigneeRef || '';
+  save(); renderTasks(); updateStats(); closeEdit();
+  toast('Tâche mise à jour', 'ok');
+  const updatedTask = tasks.find(t => t.id === editingId);
+
+}
+
+function deleteEdit() {
+  deleted.add(String(editingId));
+  localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
+  tasks = tasks.filter(t => t.id!==editingId);
+  save(); renderTasks(); updateStats(); tickClock(); closeEdit();
+  toast('Tâche supprimée', 'info');
+}
+
+let githubLock = false;
+let pendingSync = false;
+
+function save() {
+  localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
+  scheduleSyncToGitHub();
+}
+
+function scheduleSyncToGitHub() {
+  if (githubLock) { pendingSync = true; return Promise.resolve(); }
+  githubLock = true;
+  return syncToGitHub().finally(async () => {
+    githubLock = false;
+    if (pendingSync) { pendingSync = false; scheduleSyncToGitHub(); }
+  });
+}
+
+
+async function syncToGitHub() {
+  if (!config.ghToken) return;
+  const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/tasks.json';
+  try {
+    // Re-lit le SHA juste avant d'écrire pour éviter les conflits 409
+    const getRes = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    if (!getRes.ok) return;
+    const getData = await getRes.json();
+    // Inclut la liste des suppressions pour sync entre appareils
+    const payload = { tasks, deletedIds: [...deleted] };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'TaskMail: mise a jour des taches', content, sha: getData.sha })
+    });
+    if (putRes.status === 409) {
+      console.warn('Conflit 409 sur syncToGitHub - sera retenté');
+      return;
+    }
+    console.log('Taches synchronisees sur GitHub');
+  } catch(e) {
+    console.warn('Sync GitHub échoué:', e.message);
+  }
+}
+
+function setFilter(f, el) {
+  filter = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
+const priorityOrder = { high: 0, medium: 1, low: 2 };
+function sortByPriority(list) {
+  return [...list].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+}
+function getFiltered() {
+  let list;
+  if (filter === 'me')
+    list = tasks.filter(t => !t.assigneeRef || t.assigneeRef === '' || t.assigneeRef === '__me__');
+  else if (filter === 'contact')
+    list = tasks.filter(t => t.assigneeRef && t.assigneeRef.startsWith('__contact_'));
+  else if (filter === 'both')
+    list = tasks.filter(t => t.assigneeRef && t.assigneeRef.startsWith('__both_'));
+  else
+    list = [...tasks];
+  return sortByPriority(list);
+}
+
+function renderTasks() {
+  const el   = document.getElementById('task-list');
+  const list = getFiltered();
+  const ct0 = contacts[0];
+  const contactName = ct0 ? ct0.name : 'Contact';
+  const labels = { all:'Toutes les tâches', me:'Mes tâches', contact: contactName, both: contactName + ' et moi' };
+  const _sh = document.getElementById('section-head'); if(_sh) _sh.textContent = labels[filter] || 'Tâches';
+
+  const doneBar = document.getElementById('done-bar');
+  if (doneBar) doneBar.style.display = tasks.some(t => t.done) ? 'block' : 'none';
+
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">Aucune tâche</div><div class="empty-sub">Ajoutez-en une ci-dessous</div></div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="task-group">${list.map(t => `
+    <div class="task-row ${t.done?'done':''}">
+      <div class="cb ${t.done?'checked':''}" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+      <div class="priority-dot pd-${t.priority}"></div>
+      <div class="task-body" onclick="openEdit(${t.id})">
+        <div class="task-title">${esc(t.title)}</div>
+        ${t.project ? `<div class="task-project">${esc(t.project)}</div>` : ''}
+
+        ${(!t.assignedBy && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') ? '<div class="task-project" style="color:#2D5BE3;">Responsable : ' + esc(getAssigneeLabel(t)) + '</div>' : ''}
+      </div>
+      <button class="edit-btn" onclick="openEdit(${t.id})">✎</button>
+    </div>
+  `).join('')}</div>`;
+}
+
+function updateStats() {
+  const _st = document.getElementById('s-total'); if(_st) _st.textContent = tasks.length;
+  const _sd = document.getElementById('s-done'); if(_sd) _sd.textContent = tasks.filter(t => t.done).length;
+  const _sh2 = document.getElementById('s-high'); if(_sh2) _sh2.textContent = tasks.filter(t => t.priority==='high' && !t.done).length;
+}
+
+
+// -- SCHEDULES CONFIG ----------------------
+let remoteSchedules = [];
+
+async function loadSchedules() {
+  if (!config.ghToken) return;
+  try {
+    const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const bytes = Uint8Array.from(atob(data.content.replace(/\s/g, '')), ch => ch.charCodeAt(0));
+    const cfg = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    remoteSchedules = cfg.schedules || [];
+    renderScheduleChipsConfig();
+  } catch(e) { console.warn('Chargement config échoué:', e.message); }
+}
+
+async function saveSchedules() {
+  if (!config.ghToken) { toast('Token GitHub requis', 'err'); return; }
+  try {
+    const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
+    const getRes = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
+    });
+    const getData = await getRes.json();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'TaskMail: mise à jour des horaires', content, sha: getData.sha })
+    });
+    toast('Horaires sauvegardés', 'ok');
+  } catch(e) { toast('Erreur: ' + e.message, 'err'); }
+}
+
+function addScheduleConfig() {
+  const v = document.getElementById('new-schedule').value;
+  if (!v || remoteSchedules.includes(v)) { if (remoteSchedules.includes(v)) toast('Déjà ajouté', 'info'); return; }
+  remoteSchedules.push(v); remoteSchedules.sort();
+  renderScheduleChipsConfig();
+  saveSchedules();
+}
+
+function removeScheduleConfig(v) {
+  remoteSchedules = remoteSchedules.filter(s => s !== v);
+  renderScheduleChipsConfig();
+  saveSchedules();
+}
+
+function renderScheduleChipsConfig() {
+  const el = document.getElementById('schedule-chips');
+  if (!el) return;
+  if (!remoteSchedules.length) {
+    el.innerHTML = '<span style="font-size:0.78rem;color:#8E8E93;">Aucun horaire</span>';
+    return;
+  }
+  el.innerHTML = remoteSchedules.map(s => `
+    <div style="display:inline-flex;align-items:center;gap:5px;background:#EEF2FD;border:1.5px solid #2D5BE3;border-radius:20px;padding:5px 10px;font-size:0.78rem;color:#2D5BE3;">
+      <span style="font-family:monospace;">${s}</span>
+      <button onclick="removeScheduleConfig('${s}')" style="background:none;border:none;color:#2D5BE3;cursor:pointer;font-size:0.8rem;opacity:0.7;padding:0;line-height:1;">✕</button>
+    </div>
+  `).join('');
+}
+
+
+// ── CONTACTS ──────────────────────────────
+async function saveConfigToGitHub() {
+  if (!config.ghToken) return;
+  try {
+    const url = 'https://api.github.com/repos/napolsg/tdb/contents/config.json';
+    const getRes = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    const getData = await getRes.json();
+    const configData = { schedules, contacts, ownerName: config.ownerName || '' };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(configData, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'TaskMail: mise a jour config', content, sha: getData.sha })
+    });
+    console.log('Config sauvegardée sur GitHub');
+  } catch(e) {
+    console.warn('Sauvegarde config GitHub échouée:', e.message);
+  }
+}
+
+function saveContacts() {
+  localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  saveConfigToGitHub();
+}
+
+function renderContactsList() {
+  const el = document.getElementById('contacts-list');
+  if (!el) return;
+  if (!contacts.length) {
+    el.innerHTML = '<div style="padding:12px 14px; font-size:0.8rem; color:#8E8E93;">Aucun contact</div>';
+    return;
+  }
+  el.innerHTML = contacts.map((ct, i) => `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:0.5px solid #F2F2F7;">
+      <div>
+        <div style="font-size:0.88rem; font-weight:600; color:#1C1C1E;">${esc(ct.name)}</div>
+        <div style="font-size:0.72rem; color:#8E8E93;">${ct.repo ? 'Dépôt: ' + ct.repo : ''}${ct.repo && ct.email ? '<br>' : ''}${ct.email ? 'Email: ' + ct.email : ''}</div>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <button onclick="editContact(${i})" style="background:#F2F2F7; border:none; border-radius:7px; padding:5px 10px; font-size:0.75rem; color:#3C3C43; cursor:pointer;">✎</button>
+        <button onclick="deleteContact(${i})" style="background:#FDF0EE; border:none; border-radius:7px; padding:5px 10px; font-size:0.75rem; color:#C0392B; cursor:pointer;">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddContact() {
+  document.getElementById('contact-form-title').textContent = 'Nouveau contact';
+  document.getElementById('editing-contact-idx').value = '-1';
+  document.getElementById('cf-name').value = '';
+  document.getElementById('cf-repo').value = '';
+  document.getElementById('cf-email').value = '';
+  document.getElementById('contact-edit-form').style.display = 'block';
+}
+
+function editContact(i) {
+  const ct = contacts[i];
+  if (!ct) return;
+  document.getElementById('contact-form-title').textContent = 'Modifier le contact';
+  document.getElementById('editing-contact-idx').value = i;
+  document.getElementById('cf-name').value = ct.name || '';
+  document.getElementById('cf-email').value = ct.email || '';
+  document.getElementById('cf-repo').value = ct.repo || '';
+  document.getElementById('contact-edit-form').style.display = 'block';
+}
+
+function deleteContact(i) {
+  contacts.splice(i, 1);
+  saveContacts();
+  renderContactsList();
+  populateAssigneeSelects();
+  toast('Contact supprimé', 'info');
+}
+
+function saveContactForm() {
+  const name  = (document.getElementById('cf-name')?.value || '').trim();
+  const type  = document.getElementById('cf-type')?.value;
+  const repo  = (document.getElementById('cf-repo')?.value || '').trim();
+  const email = (document.getElementById('cf-email')?.value || '').trim();
+  if (!name) { toast('Nom requis', 'err'); return; }
+  if (!repo && !email) { toast('Dépôt ou email requis', 'err'); return; }
+  const ct = { name, email, repo: (document.getElementById('cf-repo')?.value || '').trim(), both: !!(email && (document.getElementById('cf-repo')?.value || '').trim()) };
+  const idx = parseInt(document.getElementById('editing-contact-idx').value);
+  if (idx >= 0) {
+    contacts[idx] = ct;
+  } else {
+    contacts.push(ct);
+  }
+  saveContacts();
+  renderContactsList();
+  populateAssigneeSelects();
+  cancelContactForm();
+  toast((idx >= 0 ? 'Contact modifié' : 'Contact ajouté'), 'ok');
+}
+
+function cancelContactForm() {
+  document.getElementById('contact-edit-form').style.display = 'none';
+}
+
+function populateAssigneeSelects() {
+  let opts = '<option value="">-- Personne --</option>';
+  opts += '<option value="__me__">Moi</option>';
+  contacts.forEach(function(ct, i) {
+    opts += '<option value="__contact_' + i + '__">' + ct.name + '</option>';
+    if (ct.repo) {
+      opts += '<option value="__both_' + i + '__">' + ct.name + ' et moi</option>';
+    }
+  });
+  opts += '<option value="__new__">+ Nouveau contact</option>';
+  ['new-assignee', 'e-assignee'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+  // Update filter button labels
+  if (contacts.length > 0) {
+    const ct = contacts[0];
+    const bothBtn = document.getElementById('filter-both-btn');
+    const contactBtn = document.getElementById('filter-contact-btn');
+    if (bothBtn) { bothBtn.textContent = ct.name + ' et moi'; bothBtn.style.display = ''; }
+    if (contactBtn) { contactBtn.textContent = ct.name; contactBtn.style.display = ''; }
+  }
+}
+
+
+function onAssigneeChange(sel) {
+  if (!sel) return;
+  const editForm = document.getElementById('inline-contact-form');
+  const addForm  = document.getElementById('add-bar-contact-form');
+
+  if (sel.value === '__new__') {
+    if (sel.id === 'new-assignee' && addForm) {
+      addForm.style.display = 'block';
+      addForm.dataset.triggeredBy = sel.id;
+      if (editForm) editForm.style.display = 'none';
+    } else if (editForm) {
+      editForm.style.display = 'block';
+      editForm.dataset.triggeredBy = sel.id;
+      if (addForm) addForm.style.display = 'none';
+    }
+  } else {
+    if (editForm) editForm.style.display = 'none';
+    if (addForm)  addForm.style.display  = 'none';
+  }
+}
+
+
+function getAssigneeEmail(val) {
+  if (!val || val === '--' || val === '' ) return '';
+  if (val === '__me__') return '';
+  if (val === '__new__') return '';
+  if (val.startsWith('__contact_')) {
+    const idx = parseInt(val.replace('__contact_', '').replace('__', ''));
+    const ct = contacts[idx];
+    if (!ct) return '';
+    return ct.email || ct.repo || '';
+  }
+  return val;
+}
+
+function getAssignedByLabel(t) {
+  if (!t.assignedBy) return '';
+  const ct = contacts.find(c => c.repo === t.assignedBy || c.name === t.assignedBy);
+  return ct ? ct.name : t.assignedBy;
+}
+
+function getAssigneeLabel(t) {
+  if (!t.assigneeRef) return '';
+  if (t.assigneeRef === '__me__') return 'Moi';
+  if (t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')) {
+    const ct = getContactByValue(t.assigneeRef);
+    if (!ct) return '';
+    return t.assigneeRef.startsWith('__both_') ? ct.name + ' et moi' : ct.name;
+  }
+  return '';
+}
+
+function getContactByValue(val) {
+  if (!val) return null;
+  if (val.startsWith('__contact_') || val.startsWith('__both_')) {
+    const idx = parseInt(val.replace('__contact_', '').replace('__both_', '').replace('__', ''));
+    return contacts[idx] || null;
+  }
+  return null;
+}
+
+function clearDone() {
+  const doneIds = tasks.filter(t => t.done).map(t => String(t.id));
+  doneIds.forEach(id => deleted.add(id));
+  localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
+  tasks = tasks.filter(t => !t.done);
+  save(); renderTasks(); updateStats(); tickClock();
+  toast('Tâches faites supprimées', 'ok');
+}
+
+
+
+
+async function triggerCompletionNotification(task) {
+  // Quand une tâche reçue (assignedBy) est complétée, notifie l'assigneur
+  if (!task.assignedBy || !config.ghToken) return;
+  // Cherche l'email de l'assigneur dans les contacts
+  // Cherche par repo, nom ou ownerName
+  const ct = contacts.find(c => 
+    c.repo === task.assignedBy || 
+    c.name === task.assignedBy ||
+    (task.assignedBy && c.name.toLowerCase() === task.assignedBy.toLowerCase()) ||
+    (task.assignedBy && c.repo && c.repo.toLowerCase() === task.assignedBy.toLowerCase())
+  );
+  if (!ct || !ct.email) {
+    console.warn('Contact assigneur non trouvé pour:', task.assignedBy, 'contacts:', contacts.map(c => c.name + '/' + c.repo));
+    return;
+  }
+
+  try {
+    await fetch('https://api.github.com/repos/napolsg/' + repo + '/actions/workflows/notify.yml/dispatches', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'token ' + sanitize(config.ghToken),
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ref: 'main',
+        inputs: { task_id: String(task.id), to_email: ct.email, notif_type: 'completed' }
+      })
+    });
+    console.log('Notification complétion envoyée à ' + ct.email);
+  } catch(e) {
+    console.warn('Notification complétion échouée:', e.message);
+  }
+}
+
+function render() { renderTasks(); updateStats(); renderChips(); renderLog(); updateNextSend(); populateAssigneeSelects(); }
+
+function openSettings() {
+  document.getElementById('s-overlay').classList.add('open');
+  document.getElementById('s-sheet').classList.add('open');
+  updateTokenUI();
+  loadSchedules();
+  populateAssigneeSelects();
+  renderContactsList();
+}
+function closeSettings() {
+  document.getElementById('s-overlay').classList.remove('open');
+  document.getElementById('s-sheet').classList.remove('open');
+}
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else { init(); }
+</script>
+</body>
+</html>

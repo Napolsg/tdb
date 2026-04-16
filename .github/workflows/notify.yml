@@ -1,0 +1,39 @@
+name: Notification tâche
+
+on:
+  push:
+    paths:
+      - 'tasks.json'
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: 'ID de la tâche'
+        required: true
+      to_email:
+        description: 'Email destinataire'
+        required: true
+      notif_type:
+        description: 'Type: assigned ou completed'
+        required: true
+        default: 'assigned'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install nodemailer
+      - name: Envoyer notification
+        env:
+          GMAIL_USER_NAPO: ${{ secrets.GMAIL_USER_NAPO }}
+          GMAIL_PASSWORD_NAPO: ${{ secrets.GMAIL_PASSWORD_NAPO }}
+          GMAIL_USER_BITCHOUN: ${{ secrets.GMAIL_USER_BITCHOUN }}
+          GMAIL_PASSWORD_BITCHOUN: ${{ secrets.GMAIL_PASSWORD_BITCHOUN }}
+          TASK_ID: ${{ inputs.task_id }}
+          TO_EMAIL: ${{ inputs.to_email }}
+          NOTIF_TYPE: ${{ inputs.notif_type }}
+          GITHUB_EVENT: ${{ github.event_name }}
+        run: node notify.js
