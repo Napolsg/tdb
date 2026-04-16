@@ -128,12 +128,19 @@ function sendMail(to, subject, html, profileKey) {
   const pending = allTasks.filter(t => !t.done && !deletedIds.has(String(t.id)));
   if (!pending.length) { console.log('Aucune tâche en attente'); process.exit(0); }
 
-  await sendMail(
-    process.env.GMAIL_USER,
-    `To Do du Bonheur — ${pending.length} tâche${pending.length>1?'s':''} en attente`,
-    buildHTML(pending, 'en attente')
-  );
-  console.log(`Email envoyé (${pending.length} tâches)`);
+  // Envoie un rappel par profil
+  for (const [profileKey, profile] of Object.entries(PROFILES)) {
+    if (!profile.email || !profile.password) continue;
+    const profileTasks = pending.filter(t => !t.owner || t.owner === profile.name);
+    if (!profileTasks.length) { console.log(`Aucune tâche pour ${profile.name}`); continue; }
+    await sendMail(
+      profile.email,
+      `To Do du Bonheur — ${profileTasks.length} tâche${profileTasks.length>1?'s':''} à faire`,
+      buildHTML(profileTasks, 'en attente'),
+      profileKey
+    );
+    console.log(`Email envoyé à ${profile.name} (${profileTasks.length} tâches)`);
+  }
 
   if (lockKey) {
     try {
