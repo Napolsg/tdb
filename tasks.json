@@ -7,6 +7,39 @@
       "project": "",
       "assignee": "__both_0__",
       "assigneeRef": "__both_0__",
+      "done": true,
+      "created": "2026-04-16T09:03:31.664Z",
+      "owner": "Bitchoun"
+    },
+    {
+      "id": 1776330077572,
+      "title": "Coucou2",
+      "priority": "medium",
+      "project": "",
+      "assignee": "l.lassus87@gmail.com",
+      "assigneeRef": "__contact_0__",
+      "done": false,
+      "created": "2026-04-16T09:01:17.572Z",
+      "owner": "Bitchoun"
+    },
+    {
+      "id": 1776329631575,
+      "title": "Tst 2",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-04-16T08:53:51.575Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1776330211664,
+      "title": "Coucou3",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
       "done": false,
       "created": "2026-04-16T09:03:31.664Z",
       "owner": "Bitchoun"
@@ -32,17 +65,6 @@
       "done": false,
       "created": "2026-04-16T08:53:39.280Z",
       "owner": "Bitchoun"
-    },
-    {
-      "id": 1776329631575,
-      "title": "Tst 2",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-04-16T08:53:51.575Z",
-      "owner": "Napo"
     }
   ],
   "deletedIds": [
