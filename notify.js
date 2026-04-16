@@ -120,7 +120,7 @@ function sendMail(to, subject, html, profileKey) {
       // Envoie depuis le compte de l'owner de la tâche
       const senderProfile = Object.entries(PROFILES_DATA).find(([k,p]) => p.name === task.owner)?.[0] || 'napo';
       await sendMail(ctEmail, `To Do du Bonheur — Nouvelle tâche : ${task.title}`, buildHTML(task, 'assigned'), senderProfile);
-      console.log(`Notification assignation envoyée à ${ct.email} pour: ${task.title}`);
+      console.log(`Notification assignation envoyée à ${ctEmail} pour: ${task.title}`);
     }
   } else {
     const taskId  = process.env.TASK_ID;
