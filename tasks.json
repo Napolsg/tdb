@@ -1,5 +1,17 @@
 {
-  "tasks": [],
+  "tasks": [
+    {
+      "id": 1776330326245,
+      "title": "Kikou",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-04-16T09:05:26.245Z",
+      "owner": "Napo"
+    }
+  ],
   "deletedIds": [
     "1776327292807",
     "1776328765293",
