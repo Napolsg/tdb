@@ -1,28 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1776328765293,
-      "title": "Test 4",
-      "priority": "medium",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-04-16T08:39:25.293Z",
-      "owner": "Bitchoun"
-    },
-    {
-      "id": 1776328288143,
-      "title": "Test 2",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-04-16T08:31:28.143Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1776328621285,
       "title": "Test 3",
       "priority": "medium",
@@ -35,6 +13,8 @@
     }
   ],
   "deletedIds": [
-    "1776327292807"
+    "1776327292807",
+    "1776328765293",
+    "1776328288143"
   ]
 }
