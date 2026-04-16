@@ -507,21 +507,7 @@ html, body {
   </div>
   <button class="sheet-btn btn-blue" id="save-btn" onclick="saveConfig()">Sauvegarder le token</button>
 
-  <div class="sheet-group-label">Contacts</div>
-  <div class="sheet-group" id="contacts-list"></div>
-  <button class="sheet-btn btn-gray" onclick="openAddContact()">+ Ajouter un contact</button>
 
-  <div id="contact-edit-form" style="display:none; margin:0 16px 12px; background:white; border-radius:14px; border:0.5px solid #E8E8E4; padding:14px;">
-    <div style="font-size:0.7rem; font-weight:700; color:#8E8E93; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px;" id="contact-form-title">Nouveau contact</div>
-    <input type="hidden" id="editing-contact-idx" value="-1">
-    <input class="sheet-input" type="text" id="cf-name" placeholder="Nom" style="margin-bottom:6px;">
-    <input class="sheet-input" type="email" id="cf-email" placeholder="email@exemple.com" style="margin-bottom:6px;">
-    <input class="sheet-input" type="text" id="cf-repo" placeholder="Dépôt GitHub (ex: tdb) — optionnel" style="margin-bottom:6px;">
-        <div style="display:flex; gap:6px;">
-      <button onclick="saveContactForm()" style="flex:1; background:#1C1C1E; color:white; border:none; border-radius:9px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">Enregistrer</button>
-      <button onclick="cancelContactForm()" style="flex:1; background:#F2F2F7; color:#3C3C43; border:none; border-radius:9px; padding:10px; font-size:0.85rem; font-weight:600; cursor:pointer;">Annuler</button>
-    </div>
-  </div>
 
   <div class="sheet-group-label">Horaires d'envoi (heure de Paris)</div>
   <div class="sheet-group">
@@ -571,7 +557,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.3</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v1.6</div>
 
 <div id="toasts"></div>
 
@@ -756,7 +742,7 @@ function showProfileSelector() {
   if (el) el.style.display = 'flex';
 }
 
-function selectProfile(profileKey) {
+async function selectProfile(profileKey) {
   const profile = PROFILES[profileKey];
   if (!profile) return;
   
@@ -773,14 +759,21 @@ function selectProfile(profileKey) {
     localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
   }
   
+  // Vide les tâches locales pour recharger depuis GitHub
+  tasks = [];
+  deleted = new Set();
+  localStorage.removeItem('tdb_tasks');
+  localStorage.removeItem('tdb_deleted');
+
   // Hide selector
   const el = document.getElementById('profile-overlay');
   if (el) el.style.display = 'none';
   
-  // Update UI
+  // Update UI et resync depuis GitHub
   updateProfileDisplay();
-  render();
   populateAssigneeSelects();
+  await syncFromGitHub(true);
+  render();
   
   toast('Bonjour ' + profile.name + ' !', 'ok');
 }
@@ -937,10 +930,11 @@ function addTask() {
   const title = document.getElementById('new-title').value.trim();
   if (!title) return;
   const profile = PROFILES[currentProfile];
-  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(document.getElementById('new-assignee').value), assigneeRef: document.getElementById('new-assignee').value, done:false, created:new Date().toISOString(), owner: profile ? profile.name : '' });
+  const assigneeVal = document.getElementById('new-assignee').value || '__me__';
+  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(assigneeVal), assigneeRef: assigneeVal, done:false, created:new Date().toISOString(), owner: profile ? profile.name : '' });
   document.getElementById('new-title').value = '';
   document.getElementById('new-project').value = '';
-  document.getElementById('new-assignee').value = '';
+  document.getElementById('new-assignee').value = '__me__';
   save(); renderTasks(); updateStats(); tickClock();
   const newTask = tasks[0];
   if (newTask && newTask.assigneeRef && newTask.assigneeRef.startsWith('__contact_')) {
@@ -1338,15 +1332,13 @@ function cancelContactForm() {
 }
 
 function populateAssigneeSelects() {
-  let opts = '<option value="">-- Personne --</option>';
-  opts += '<option value="__me__">Moi</option>';
+  let opts = '<option value="__me__">Moi</option>';
   contacts.forEach(function(ct, i) {
     opts += '<option value="__contact_' + i + '__">' + ct.name + '</option>';
     if (ct.repo) {
       opts += '<option value="__both_' + i + '__">' + ct.name + ' et moi</option>';
     }
   });
-  opts += '<option value="__new__">+ Nouveau contact</option>';
   ['new-assignee', 'e-assignee'].forEach(function(id) {
     const el = document.getElementById(id);
     if (el) el.innerHTML = opts;
