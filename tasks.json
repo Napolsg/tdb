@@ -1,5 +1,17 @@
 {
-  "tasks": [],
+  "tasks": [
+    {
+      "id": 1776329302512,
+      "title": "Test",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-04-16T08:48:22.512Z",
+      "owner": "Napo"
+    }
+  ],
   "deletedIds": [
     "1776327292807",
     "1776328765293",
