@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install nodemailer
+      - run: npm install nodemailer @octokit/rest
       - name: Envoyer notification
         env:
           GMAIL_USER_NAPO: ${{ secrets.GMAIL_USER_NAPO }}

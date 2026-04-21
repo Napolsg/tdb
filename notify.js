@@ -106,9 +106,11 @@ function sendMail(to, subject, html, profileKey) {
   const eventName = process.env.GITHUB_EVENT || 'workflow_dispatch';
 
   if (eventName === 'push') {
-    const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000);
+    // Fenêtre de 90 secondes + délai aléatoire pour éviter les races
+    await new Promise(r => setTimeout(r, Math.floor(Math.random() * 10000)));
+    const ninetySecAgo = new Date(Date.now() - 90 * 1000);
     const newAssigned = allTasks.filter(t =>
-      !t.assignedBy && t.assigneeRef && !t.done && t.created && new Date(t.created) > twoMinAgo
+      !t.assignedBy && t.assigneeRef && !t.done && t.created && new Date(t.created) > ninetySecAgo
     );
     if (!newAssigned.length) { console.log('Aucune nouvelle tâche assignée récente'); return; }
 
