@@ -1,8 +1,6 @@
 name: Récupérer tâches et envoyer rappels
 
 on:
-  schedule:
-    - cron: '*/15 5-22 * * *'
   workflow_dispatch:
 
 jobs:
