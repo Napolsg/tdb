@@ -6,7 +6,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="TaskMail">
+<meta name="apple-mobile-web-app-title" content="To Do du Bonheur">
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon-precomposed" href="icon-192.png">
@@ -509,14 +509,6 @@ html, body {
 
 
 
-  <div class="sheet-group-label">Horaires d'envoi (heure de Paris)</div>
-  <div class="sheet-group">
-    <div id="schedule-chips" style="display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; min-height:20px;"></div>
-    <div style="display:flex; gap:8px; padding:0 14px 12px; align-items:center;">
-      <input type="time" id="new-schedule" value="08:00" style="flex:1; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:9px; padding:9px 12px; font-size:0.85rem; color:#1C1C1E; outline:none;">
-      <button onclick="addScheduleConfig()" style="background:#1C1C1E; color:white; border:none; border-radius:9px; padding:9px 16px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">Ajouter</button>
-    </div>
-  </div>
 </div>
 
 <!-- EDIT OVERLAY -->
@@ -557,7 +549,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v2.0</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.5</div>
 
 <div id="toasts"></div>
 
@@ -584,7 +576,6 @@ const PROFILES = {
 
 let config    = JSON.parse(localStorage.getItem('tdb_config')    || '{}');
 let tasks     = JSON.parse(localStorage.getItem('tdb_tasks')     || '[]');
-let schedules = JSON.parse(localStorage.getItem('tdb_schedules') || '["08:00","18:00"]');
 let log       = JSON.parse(localStorage.getItem('tdb_log')       || '[]');
 let deleted   = new Set(JSON.parse(localStorage.getItem('tdb_deleted') || '[]'));
 let currentProfile = localStorage.getItem('tdb_profile') || null;
@@ -592,7 +583,6 @@ let contacts  = JSON.parse(localStorage.getItem('tdb_contacts') || 'null') ||
   (currentProfile && PROFILES[currentProfile] ? PROFILES[currentProfile].contacts : []);
 let filter    = 'all';
 let editingId = null;
-let lastMin   = null;
 
 async function init() {
   if (config.to && document.getElementById('ejs-to'))       document.getElementById('ejs-to').value       = config.to;
@@ -618,50 +608,17 @@ async function init() {
   // Affiche la liste immédiatement
   render();
 
-  // Déclenche fetch-and-send en arrière-plan
+  // Sync depuis GitHub au chargement
   const ind = document.getElementById('sync-indicator');
   if (ind) ind.style.display = 'block';
-  await triggerFetchTasks();
-  await new Promise(r => setTimeout(r, 5000));
   await syncFromGitHub(true);
-  // Pousse les tâches assignées sans écraser tasks.json local
   if (ind) ind.style.display = 'none';
 
   // Pas de tâches par défaut
 
   setInterval(tickClock, 1000);
-  setInterval(checkSchedules, 15000);
-  // Sync depuis GitHub toutes les 2 minutes (silencieuse)
   setInterval(() => syncFromGitHub(false), 120000);
-  tickClock(); checkSchedules();
-}
-
-async function triggerFetchTasks() {
-  if (!config.ghToken) return;
-
-  // Ne déclenche pas si lancé il y a moins de 5 minutes
-  const lastTrigger = parseInt(localStorage.getItem('tdb_last_trigger') || '0');
-  const now = Date.now();
-  if (now - lastTrigger < 5 * 60 * 1000) {
-    console.log('Fetch-tasks ignoré (lancé il y a moins de 5 min)');
-    return;
-  }
-  localStorage.setItem('tdb_last_trigger', String(now));
-
-  try {
-    await fetch('https://api.github.com/repos/napolsg/tdb/actions/workflows/fetch-and-send.yml/dispatches', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'token ' + sanitize(config.ghToken),
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ref: 'main' })
-    });
-    console.log('Workflow fetch-and-send déclenché');
-  } catch(e) {
-    console.warn('Déclenchement workflow échoué:', e.message);
-  }
+  tickClock();
 }
 
 async function syncFromGitHub(notify = false) {
@@ -730,15 +687,7 @@ function tickClock() {
     `${h}:${m}  ·  ${active} tâche${active !== 1 ? 's' : ''} en cours`;
 }
 
-function checkSchedules() {
-  const n    = new Date();
-  const hhmm = n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
-  const min  = n.getHours() * 60 + n.getMinutes();
-  if (schedules.includes(hhmm) && lastMin !== min) { lastMin = min; sendEmail('auto'); }
-  updateNextSend();
-}
 
-function updateNextSend() { /* désactivé */ }
 
 function showProfileSelector() {
   const el = document.getElementById('profile-overlay');
@@ -844,51 +793,7 @@ function showTokenInput() {
   btn.onclick = saveConfig;
 }
 
-function sendMailto() {
-  const to = config.to || document.getElementById('ejs-to').value.trim();
-  if (!to) { toast('Renseigne une adresse email destinataire', 'err'); return; }
-  const pending = tasks.filter(t => !t.done);
-  if (!pending.length) { toast('Aucune tâche en attente', 'info'); return; }
-  const pLabel = { high:'URGENT', medium:'Moyen', low:'Faible' };
-  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' -- '+t.project:''}`).join('\n');
-  const timeStr = new Date().toLocaleString('fr-FR');
-  const subject = encodeURIComponent(`TaskMail -- ${pending.length} tâche(s) à faire`);
-  const body    = encodeURIComponent(`Bonjour,\n\nVos tâches du ${timeStr} :\n\n${lines}\n\n-- TaskMail`);
-  const a = document.createElement('a');
-  a.href = `mailto:${to}?subject=${subject}&body=${body}`;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => document.body.removeChild(a), 200);
-  addLog({ time: timeStr, status:'sent', count: pending.length });
-  toast(`Email préparé -- ${pending.length} tâche(s)`, 'ok');
-}
 
-async function sendEmail(mode) {
-  const pending = tasks.filter(t => !t.done);
-  if (!pending.length) { if (mode !== 'auto') toast('Aucune tâche en attente', 'info'); return; }
-  const pLabel = { high:'URGENT', medium:'Moyen', low:'Faible' };
-  const lines  = pending.map((t,i) => `${i+1}. [${pLabel[t.priority]}] ${t.title}${t.project?' -- '+t.project:''}`).join('\n');
-  const timeStr = new Date().toLocaleString('fr-FR');
-  if (!config.service || !config.template || !config.pubkey || !config.to) {
-    addLog({ time:timeStr, status:'sim', count:pending.length });
-    if (mode !== 'auto') toast('Mode simulation -- configurez EmailJS', 'info');
-    return;
-  }
-  try {
-    await emailjs.send(config.service, config.template, {
-      to_email:config.to, send_time:timeStr,
-      task_count:pending.length, task_list:lines,
-      subject:`TaskMail -- ${pending.length} tâche(s) à faire`,
-    });
-    addLog({ time:timeStr, status:'sent', count:pending.length });
-    toast(`Email envoyé (${pending.length} tâches)`, 'ok');
-  } catch(e) {
-    addLog({ time:timeStr, status:'error', msg:e.text||e.message });
-    toast('Erreur : '+(e.text||e.message), 'err');
-  }
-}
-
-function sendNow() { sendEmail('manual'); }
 
 function addLog(e) {
   log.unshift(e); if (log.length > 20) log.pop();
@@ -907,29 +812,7 @@ function renderLog() {
   ).join('');
 }
 
-function addSchedule() {
-  const v = document.getElementById('new-time').value;
-  if (!v || schedules.includes(v)) { if(schedules.includes(v)) toast('Déjà ajouté','info'); return; }
-  schedules.push(v); schedules.sort();
-  localStorage.setItem('tdb_schedules', JSON.stringify(schedules));
-  renderChips(); updateNextSend();
-  toast(`Horaire ${v} ajouté`, 'ok');
-}
 
-function removeSchedule(v) {
-  schedules = schedules.filter(s => s !== v);
-  localStorage.setItem('tdb_schedules', JSON.stringify(schedules));
-  renderChips(); updateNextSend();
-}
-
-function renderChips() {
-  const el = document.getElementById('chip-list');
-  if (!el) return; // element removed from UI
-  if (!schedules.length) { el.innerHTML = '<span style="font-size:0.78rem;color:#C7C7CC;padding:2px">Aucun horaire</span>'; return; }
-  el.innerHTML = schedules.map(s =>
-    `<div class="chip">${s}<button class="chip-x" onclick="removeSchedule('${s}')">✕</button></div>`
-  ).join('');
-}
 
 function addTask() {
   const title = document.getElementById('new-title').value.trim();
@@ -942,9 +825,8 @@ function addTask() {
   document.getElementById('new-assignee').value = '__me__';
   save(); renderTasks(); updateStats(); tickClock();
   const newTask = tasks[0];
-  if (newTask && newTask.assigneeRef && newTask.assigneeRef.startsWith('__contact_')) {
-    // Attend 5s que tasks.json soit bien uploadé sur GitHub avant d'envoyer la notif
-  }
+  // La notification est gérée par notify.yml via le push sur tasks.json (GitHub Actions)
+  // notify.yml a un verrou par tâche pour éviter les doublons
 }
 
 function toggleTask(id) {
@@ -1132,10 +1014,17 @@ function sortByPriority(list) {
 function getFiltered() {
   let list;
   if (filter === 'me')
-    list = tasks.filter(t => !t.assigneeRef || t.assigneeRef === '' || t.assigneeRef === '__me__');
+    // Mes tâches = sans assigné, assigné à moi, reçues d'un autre, OU assignées aux deux
+    list = tasks.filter(t => !t.assigneeRef || t.assigneeRef === '' || t.assigneeRef === '__me__'
+      || t.assignedBy
+      || (t.assigneeRef && t.assigneeRef.startsWith('__both_')));
   else if (filter === 'contact')
-    list = tasks.filter(t => t.assigneeRef && t.assigneeRef.startsWith('__contact_'));
+    // Tâches du contact = assignées à lui seul OU aux deux
+    list = tasks.filter(t => t.assigneeRef && (
+      t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')
+    ));
   else if (filter === 'both')
+    // Tâches communes = assignées aux deux
     list = tasks.filter(t => t.assigneeRef && t.assigneeRef.startsWith('__both_'));
   else
     list = [...tasks];
@@ -1166,7 +1055,8 @@ function renderTasks() {
         <div class="task-title">${esc(t.title)}</div>
         ${t.project ? `<div class="task-project">${esc(t.project)}</div>` : ''}
 
-        ${(t.owner === (PROFILES[currentProfile]?.name) && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') ? '<div class="task-project" style="color:#2D5BE3;">Responsable : ' + esc(getAssigneeLabel(t)) + '</div>' : ''}
+        ${(t.owner === (PROFILES[currentProfile]?.name) && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') ? '<div class="task-project" style="color:#2D5BE3;">Assigné à : ' + esc(getAssigneeLabel(t)) + '</div>' : ''}
+        ${t.assignedBy ? '<div class="task-project" style="color:#2eb88a;">Assigné par : ' + esc(getAssignedByLabel(t)) + '</div>' : ''}
       </div>
       <button class="edit-btn" onclick="openEdit(${t.id})">✎</button>
     </div>
@@ -1181,70 +1071,7 @@ function updateStats() {
 
 
 // -- SCHEDULES CONFIG ----------------------
-let remoteSchedules = [];
 
-async function loadSchedules() {
-  if (!config.ghToken) return;
-  try {
-    const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
-    const res = await fetch(url, {
-      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    const bytes = Uint8Array.from(atob(data.content.replace(/\s/g, '')), ch => ch.charCodeAt(0));
-    const cfg = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    remoteSchedules = cfg.schedules || [];
-    renderScheduleChipsConfig();
-  } catch(e) { console.warn('Chargement config échoué:', e.message); }
-}
-
-async function saveSchedules() {
-  if (!config.ghToken) { toast('Token GitHub requis', 'err'); return; }
-  try {
-    const url = `https://api.github.com/repos/napolsg/${repo}/contents/config.json`;
-    const getRes = await fetch(url, {
-      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' }
-    });
-    const getData = await getRes.json();
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify({ schedules: remoteSchedules }, null, 2))));
-    await fetch(url, {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'TaskMail: mise à jour des horaires', content, sha: getData.sha })
-    });
-    toast('Horaires sauvegardés', 'ok');
-  } catch(e) { toast('Erreur: ' + e.message, 'err'); }
-}
-
-function addScheduleConfig() {
-  const v = document.getElementById('new-schedule').value;
-  if (!v || remoteSchedules.includes(v)) { if (remoteSchedules.includes(v)) toast('Déjà ajouté', 'info'); return; }
-  remoteSchedules.push(v); remoteSchedules.sort();
-  renderScheduleChipsConfig();
-  saveSchedules();
-}
-
-function removeScheduleConfig(v) {
-  remoteSchedules = remoteSchedules.filter(s => s !== v);
-  renderScheduleChipsConfig();
-  saveSchedules();
-}
-
-function renderScheduleChipsConfig() {
-  const el = document.getElementById('schedule-chips');
-  if (!el) return;
-  if (!remoteSchedules.length) {
-    el.innerHTML = '<span style="font-size:0.78rem;color:#8E8E93;">Aucun horaire</span>';
-    return;
-  }
-  el.innerHTML = remoteSchedules.map(s => `
-    <div style="display:inline-flex;align-items:center;gap:5px;background:#EEF2FD;border:1.5px solid #2D5BE3;border-radius:20px;padding:5px 10px;font-size:0.78rem;color:#2D5BE3;">
-      <span style="font-family:monospace;">${s}</span>
-      <button onclick="removeScheduleConfig('${s}')" style="background:none;border:none;color:#2D5BE3;cursor:pointer;font-size:0.8rem;opacity:0.7;padding:0;line-height:1;">✕</button>
-    </div>
-  `).join('');
-}
 
 
 // ── CONTACTS ──────────────────────────────
@@ -1257,7 +1084,7 @@ async function saveConfigToGitHub() {
       cache: 'no-cache'
     });
     const getData = await getRes.json();
-    const configData = { schedules, contacts, ownerName: config.ownerName || '' };
+    const configData = { contacts, ownerName: config.ownerName || '' };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(configData, null, 2))));
     await fetch(url, {
       method: 'PUT',
@@ -1480,13 +1307,12 @@ async function triggerCompletionNotification(task) {
   }
 }
 
-function render() { renderTasks(); updateStats(); renderChips(); renderLog(); updateNextSend(); populateAssigneeSelects(); }
+function render() { renderTasks(); updateStats(); renderLog(); populateAssigneeSelects(); }
 
 function openSettings() {
   document.getElementById('s-overlay').classList.add('open');
   document.getElementById('s-sheet').classList.add('open');
   updateTokenUI();
-  loadSchedules();
   populateAssigneeSelects();
   renderContactsList();
 }

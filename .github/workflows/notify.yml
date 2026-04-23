@@ -21,6 +21,9 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Attendre 30s pour grouper les pushs rapprochés
+        if: github.event_name == 'push'
+        run: sleep 30
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -36,4 +39,5 @@ jobs:
           TO_EMAIL: ${{ inputs.to_email }}
           NOTIF_TYPE: ${{ inputs.notif_type }}
           GITHUB_EVENT: ${{ github.event_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node notify.js

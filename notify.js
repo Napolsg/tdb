@@ -132,9 +132,14 @@ function sendMail(to, subject, html, profileKey) {
     let notified = false;
     for (const task of newAssigned) {
       const taskKey = String(task.id);
-      // Vérifie si déjà notifié aujourd'hui
+      // Vérifie si déjà notifié (par id ET dans les 24h)
       if (currentConfig.notifiedTasks.find(n => n.id === taskKey)) {
         console.log('Déjà notifié pour:', task.title);
+        continue;
+      }
+      // Vérifie que la tâche a bien été créée récemment (< 90s) pour éviter les vieux pushs
+      if (task.created && new Date(task.created) < new Date(Date.now() - 90 * 1000)) {
+        console.log('Tâche trop ancienne, skip:', task.title);
         continue;
       }
 

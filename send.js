@@ -14,44 +14,6 @@ const config   = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 const now  = new Date();
 const repo = process.env.REPO_NAME || 'tdb';
 
-function isFranceDST(date) {
-  const year = date.getUTCFullYear();
-  const lastSundayMarch = new Date(Date.UTC(year, 2, 31));
-  lastSundayMarch.setUTCDate(31 - lastSundayMarch.getUTCDay());
-  const lastSundayOct = new Date(Date.UTC(year, 9, 31));
-  lastSundayOct.setUTCDate(31 - lastSundayOct.getUTCDay());
-  return date >= lastSundayMarch && date < lastSundayOct;
-}
-
-function toUTC(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  const offset = isFranceDST(now) ? 2 : 1;
-  let utcH = h - offset;
-  if (utcH < 0) utcH += 24;
-  return utcH.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0');
-}
-
-const schedulesUTC = (config.schedules || []).map(toUTC);
-const today = now.toISOString().split('T')[0];
-const sentToday = config.sentToday || {};
-
-const lockKey = schedulesUTC.find(s => {
-  const [h, m] = s.split(':').map(Number);
-  return now.getUTCHours() * 60 + now.getUTCMinutes() >= h * 60 + m;
-}) || null;
-
-if (!lockKey && process.env.FORCE !== 'true') {
-  console.log("Pas encore l'heure d'envoyer");
-  process.exit(0);
-}
-
-if (lockKey && process.env.FORCE !== 'true') {
-  if (sentToday[today] && sentToday[today].includes(lockKey)) {
-    console.log('Email déjà envoyé pour ' + lockKey + " aujourd'hui");
-    process.exit(0);
-  }
-}
-
 function getTransporter(profileKey) {
   const p = PROFILES[profileKey];
   return nodemailer.createTransport({
@@ -131,7 +93,9 @@ function sendMail(to, subject, html, profileKey) {
   // Envoie un rappel par profil
   for (const [profileKey, profile] of Object.entries(PROFILES)) {
     if (!profile.email || !profile.password) continue;
-    const profileTasks = pending.filter(t => !t.owner || t.owner === profile.name);
+    // Inclut les tâches sans owner (ancien format) dans le premier profil seulement
+    const isFirst = Object.keys(PROFILES)[0] === profileKey;
+    const profileTasks = pending.filter(t => t.owner === profile.name || (!t.owner && isFirst));
     if (!profileTasks.length) { console.log(`Aucune tâche pour ${profile.name}`); continue; }
     await sendMail(
       profile.email,
@@ -142,17 +106,5 @@ function sendMail(to, subject, html, profileKey) {
     console.log(`Email envoyé à ${profile.name} (${profileTasks.length} tâches)`);
   }
 
-  if (lockKey) {
-    try {
-      const { Octokit } = require('@octokit/rest');
-      const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-      const { data } = await octokit.repos.getContent({ owner: 'napolsg', repo, path: 'config.json' });
-      const currentConfig = JSON.parse(Buffer.from(data.content, 'base64').toString());
-      if (!currentConfig.sentToday) currentConfig.sentToday = {};
-      currentConfig.sentToday = { [today]: currentConfig.sentToday[today] || [] };
-      if (!currentConfig.sentToday[today].includes(lockKey)) currentConfig.sentToday[today].push(lockKey);
-      const content = Buffer.from(JSON.stringify(currentConfig, null, 2)).toString('base64');
-      await octokit.repos.createOrUpdateFileContents({ owner: 'napolsg', repo, path: 'config.json', message: 'TDB: verrou email', content, sha: data.sha });
-    } catch(e) { console.warn('Verrou non enregistré:', e.message); }
-  }
+
 })();
