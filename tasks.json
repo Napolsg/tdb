@@ -1,25 +1,47 @@
 {
   "tasks": [
     {
-      "id": 1776333783280,
-      "title": "Kikou 4",
+      "id": 1776858051064,
+      "title": "Anniversaire Tristan",
       "priority": "medium",
       "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
       "done": false,
-      "created": "2026-04-16T10:03:03.280Z",
-      "owner": "Bitchoun"
+      "created": "2026-04-22T11:40:51.064Z",
+      "owner": "Napo"
     },
     {
-      "id": 1776330326245,
-      "title": "Kikou",
+      "id": 1776855211647,
+      "title": "Anniversaire Côme",
       "priority": "medium",
       "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
       "done": false,
-      "created": "2026-04-16T09:05:26.245Z",
+      "created": "2026-04-22T10:53:31.647Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1776855178027,
+      "title": "Cadeau Tristan",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-22T10:52:58.027Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1776855170315,
+      "title": "Cadeau Côme",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-22T10:52:50.315Z",
       "owner": "Napo"
     }
   ],
@@ -35,6 +57,8 @@
     "1776330211664",
     "1776330077572",
     "1776329631575",
-    "1776329619280"
+    "1776329619280",
+    "1776333783280",
+    "1776330326245"
   ]
 }
