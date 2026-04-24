@@ -14,6 +14,37 @@ const config   = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 const now  = new Date();
 const repo = process.env.REPO_NAME || 'tdb';
 
+// ── Vérification horaire (toujours appliquée, même avec FORCE=true) ──────────
+function isDST() {
+  const jan = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
+  const jul = new Date(now.getFullYear(), 6, 1).getTimezoneOffset();
+  return now.getTimezoneOffset() < Math.max(jan, jul);
+}
+
+function toUTC(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const offset = isDST() ? 2 : 1;
+  let utcH = h - offset;
+  if (utcH < 0) utcH += 24;
+  return utcH.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0');
+}
+
+const schedules = config.schedules || ['08:00'];
+const schedulesUTC = schedules.map(toUTC);
+const isScheduledTime = schedulesUTC.some(s => {
+  const [h, m] = s.split(':').map(Number);
+  return now.getUTCHours() === h && now.getUTCMinutes() < 15;
+});
+
+if (!isScheduledTime) {
+  const parisTime = now.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+  console.log(`Heure actuelle : ${parisTime} — Pas dans un créneau d'envoi (${schedules.join(', ')})`);
+  console.log('Envoi annulé. Utilisez config.json pour modifier les horaires.');
+  process.exit(0);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 function getTransporter(profileKey) {
   const p = PROFILES[profileKey];
   return nodemailer.createTransport({
@@ -90,10 +121,8 @@ function sendMail(to, subject, html, profileKey) {
   const pending = allTasks.filter(t => !t.done && !deletedIds.has(String(t.id)));
   if (!pending.length) { console.log('Aucune tâche en attente'); process.exit(0); }
 
-  // Envoie un rappel par profil
   for (const [profileKey, profile] of Object.entries(PROFILES)) {
     if (!profile.email || !profile.password) continue;
-    // Inclut les tâches sans owner (ancien format) dans le premier profil seulement
     const isFirst = Object.keys(PROFILES)[0] === profileKey;
     const profileTasks = pending.filter(t => t.owner === profile.name || (!t.owner && isFirst));
     if (!profileTasks.length) { console.log(`Aucune tâche pour ${profile.name}`); continue; }
@@ -105,6 +134,4 @@ function sendMail(to, subject, html, profileKey) {
     );
     console.log(`Email envoyé à ${profile.name} (${profileTasks.length} tâches)`);
   }
-
-
 })();
