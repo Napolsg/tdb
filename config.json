@@ -2,10 +2,5 @@
   "schedules": [
     "08:00"
   ],
-  "contacts": [],
-  "sentToday": {
-    "2026-04-23": [
-      "06:00"
-    ]
-  }
+  "contacts": []
 }

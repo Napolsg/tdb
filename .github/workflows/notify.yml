@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'tasks.json'
+      # NE PAS ajouter config.json ici — notify.js écrit dans config.json
+      # ce qui créerait une boucle infinie de notifications
   workflow_dispatch:
     inputs:
       task_id:

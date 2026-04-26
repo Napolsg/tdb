@@ -177,7 +177,9 @@ function sendMail(to, subject, html, profileKey) {
     const subject = type === 'assigned'
       ? `To Do du Bonheur — Nouvelle tâche : ${task.title}`
       : `To Do du Bonheur — Tâche complétée : ${task.title}`;
-    await sendMail(toEmail, subject, buildHTML(task, type));
-    console.log(`Notification ${type} envoyée à ${toEmail}`);
+    // Détermine le profil expéditeur depuis l'owner de la tâche
+    const senderProfileKey = Object.entries(PROFILES).find(([k,p]) => p.name === task.owner)?.[0] || 'napo';
+    await sendMail(toEmail, subject, buildHTML(task, type), senderProfileKey);
+    console.log(`Notification ${type} envoyée à ${toEmail} depuis profil ${senderProfileKey}`);
   }
 })();

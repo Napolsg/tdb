@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light only">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -17,8 +17,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 html, body {
-  background: #F2F2F7;
-  color: #1C1C1E;
+  background: #F2F2F7 !important;
+  color: #1C1C1E !important;
   font-family: 'Outfit', -apple-system, sans-serif;
   min-height: 100vh;
   max-width: 430px;
@@ -549,7 +549,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.5</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.6</div>
 
 <div id="toasts"></div>
 
@@ -652,14 +652,28 @@ async function syncFromGitHub(notify = false) {
     const validRemote = remote.filter(t => {
       if (deleted.has(String(t.id))) return false;
       if (!myName) return true;
-      // Mes tâches
+      // Mes tâches (créées par moi)
       if (t.owner === myName) return true;
       // Tâches sans owner (ancien format)
       if (!t.owner) return true;
-      // Tâches d'un autre profil assignées à moi (assigneeRef non vide et owner != moi)
-      // On vérifie si cette tâche est assignée au contact qui correspond à mon profil
-      if (t.owner !== myName && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') {
-        return true; // tâche assignée à quelqu'un = visible par l'assigné
+      // Tâches d'un autre profil : visibles seulement si assignées à moi
+      // __both_X__ = assignée aux deux → visible par tous
+      // __contact_X__ = assignée à un contact spécifique → visible seulement par ce contact
+      // On identifie "moi" comme contact de l'autre profil par son email ou son nom
+      if (t.owner !== myName && t.assigneeRef) {
+        if (t.assigneeRef.startsWith('__both_')) return true; // assignée aux deux
+        if (t.assigneeRef.startsWith('__contact_')) {
+          // Vérifie que ce contact correspond à mon profil
+          const profile = PROFILES[currentProfile];
+          if (!profile) return false;
+          // L'autre profil m'a assigné cette tâche si son contact[idx] = moi
+          const idx = parseInt(t.assigneeRef.replace('__contact_', '').replace('__', ''));
+          const otherProfileKey = Object.keys(PROFILES).find(k => k !== currentProfile);
+          const otherProfile = PROFILES[otherProfileKey];
+          if (!otherProfile) return false;
+          const ct = otherProfile.contacts[idx];
+          return ct && (ct.email === profile.email || ct.name === profile.name);
+        }
       }
       return false;
     });
@@ -930,10 +944,12 @@ function saveEdit() {
 }
 
 function deleteEdit() {
-  deleted.add(String(editingId));
+  const id = editingId;
+  deleted.add(String(id));
   localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
-  tasks = tasks.filter(t => t.id!==editingId);
-  save(); renderTasks(); updateStats(); tickClock(); closeEdit();
+  tasks = tasks.filter(t => t.id !== id);
+  closeEdit();
+  save(); renderTasks(); updateStats(); tickClock();
   toast('Tâche supprimée', 'info');
 }
 
