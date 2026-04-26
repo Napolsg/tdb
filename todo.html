@@ -1,625 +1,1355 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#081420">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Sport Log">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <title>Sport Log</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#081420;--sf2:#32324a;
-      --bd:#44445a;--ac:#a8d8a8;--ac2:#7ec8a0;--red:#e07a7a;
-      --tx:#e8e8f0;--mu:#8888a8;--mono:'IBM Plex Mono',monospace;--r:8px;
-      --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
-    }
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:var(--mono);}
-    .app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light only">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="To Do du Bonheur">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon-precomposed" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TO DO DU BONHEUR</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-```
-/* HEADER */
-.hdr{padding:calc(var(--safe-top) + 12px) 16px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg);}
-.hdr-l{display:flex;align-items:baseline;gap:8px;}
-.hdr h1{font-size:13px;font-weight:600;letter-spacing:.1em;color:var(--ac);text-transform:uppercase;margin:0;}
-.ver{font-size:9px;color:var(--mu);}
-.sync-btn{background:transparent;border:1px solid var(--bd);color:var(--mu);font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;}
-.sync-btn.syncing{color:var(--ac);border-color:var(--ac);}
-.sync-btn.error{color:var(--red);border-color:var(--red);}
+html, body {
+  background: #F2F2F7 !important;
+  color: #1C1C1E !important;
+  font-family: 'Outfit', -apple-system, sans-serif;
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+}
 
-/* TABS */
-.tabs{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--bg);}
-.tab{flex:1;padding:10px 0;text-align:center;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:var(--mono);}
-.tab.active{color:var(--ac);border-bottom-color:var(--ac);}
+/* -- HEADER -- */
+.header {
+  padding: 20px 20px 12px;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 50%, #6BCB77 100%);
+}
+.app-title { color: white !important; }
+.hbtn { background: rgba(255,255,255,0.25) !important; color: white !important; box-shadow: none !important; }
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+.app-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1C1C1E;
+  letter-spacing: -0.5px;
+}
+.header-actions { display: flex; gap: 8px; }
+.hbtn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: transform 0.1s;
+}
+.hbtn:active { transform: scale(0.92); }
 
-/* CONTENT */
-.content{flex:1;overflow-y:auto;padding:14px 14px calc(var(--safe-bottom) + 14px);-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.content::-webkit-scrollbar{display:none;}
 
-/* SETUP */
-.setup{padding:32px 20px;display:flex;flex-direction:column;gap:16px;}
-.setup h2{font-size:14px;font-weight:600;color:var(--ac);letter-spacing:.08em;}
-.setup p{font-size:12px;color:var(--mu);line-height:1.7;}
-.setup input{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:var(--r);width:100%;outline:none;}
-.setup input:focus{border-color:var(--ac2);}
-.setup input::placeholder{color:var(--mu);}
-.btn-primary{background:var(--ac);color:#1e1e2e;border:none;font-family:var(--mono);font-size:13px;font-weight:600;padding:12px;border-radius:var(--r);cursor:pointer;width:100%;}
-.btn-primary:active{opacity:.8;}
-.note{font-size:10px;color:var(--mu);line-height:1.6;}
 
-/* DATE */
-.day-label{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:11px;color:var(--mu);}
-.day-label input[type=date]{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:var(--mono);font-size:11px;padding:5px 9px;border-radius:4px;outline:none;color-scheme:dark;}
 
-/* TIMER — compact countdown only */
-.timer-bar{background:#0d2240;border:1px solid #1a4a7a;border-radius:var(--r);padding:10px 14px;margin-bottom:12px;--sf2:#1a3a5a;--bd:#2a5a8a;--mu:#4a8aaa;--tx:#c0d8f0;}
-.timer-top{display:flex;align-items:center;gap:8px;}
-.td-part{font-size:28px;font-weight:600;color:var(--ac);letter-spacing:0;font-variant-numeric:tabular-nums;font-family:var(--mono);}
-.td-part.run{color:var(--ac2);}
-.td-part.alr{color:var(--red);}
-.td-colon{font-size:28px;font-weight:600;color:var(--ac);line-height:1;}
-.td-colon.run{color:var(--ac2);}
-.td-colon.alr{color:var(--red);}
 
-.bt{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;flex:1;}
-.bt.on{border-color:var(--ac);color:var(--ac);}
-.bt:active{background:#3a3a52;}
-.timer-sel{background:transparent;border:none;color:var(--ac);font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;padding:0;outline:none;color-scheme:dark;cursor:pointer;width:100px;height:40px;-webkit-appearance:none;appearance:none;}
 
-/* ADD EXO */
-.add-exo{display:flex;gap:8px;margin-bottom:14px;}
-.exo-wrap{flex:1;position:relative;min-width:0;z-index:100;}
-.add-exo input{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:var(--r);width:100%;outline:none;}
-.add-exo input:focus{border-color:var(--ac2);}
-.add-exo input::placeholder{color:var(--mu);}
-.dropdown{position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);z-index:200;max-height:200px;overflow-y:auto;}
-.ddi{padding:11px 12px;font-size:13px;cursor:pointer;color:var(--tx);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
-.ddi:last-child{border-bottom:none;}
-.ddi:active{background:#3a3a52;}
-.ddi.new{color:var(--ac);font-style:italic;}
-.ddx{color:var(--mu);font-size:14px;padding:4px 10px;}
-.btn-acc{background:#3a4255;color:#a8b8d0;border:1px solid #505868;font-family:var(--mono);font-size:18px;font-weight:700;padding:10px 14px;border-radius:var(--r);cursor:pointer;flex-shrink:0;line-height:1;}
-.btn-acc:active{opacity:.8;}
-.save-st{font-size:11px;color:var(--ac2);text-align:right;min-height:0;margin-bottom:0;}
+/* -- FILTERS -- */
+.filters {
+  display: flex;
+  gap: 7px;
+  padding: 16px 20px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filters::-webkit-scrollbar { display: none; }
+.fbtn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  background: white;
+  color: #3C3C43;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: all 0.15s;
+}
+.fbtn.active { background: #FF6B6B; color: white; box-shadow: 0 2px 8px rgba(255,107,107,0.35); }
+.fbtn:active { transform: scale(0.95); }
 
-/* EXO CARD */
-.exo-card{padding:8px 0;border-bottom:1px solid var(--bd);margin-bottom:0;}
-.exo-card:last-of-type{border-bottom:none;}
-.exo-row{display:flex;align-items:center;gap:5px;}
-.exo-name-wrap{display:flex;align-items:center;gap:4px;flex:1;min-width:0;}
-.exo-chips-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0;}
-.exo-name{font-size:14px;font-weight:600;color:var(--tx);white-space:normal;word-break:break-word;line-height:1.3;}
 
-/* WEIGHT — inline in exo header */
-.weight-input{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:var(--mono);font-size:13px;padding:4px 2px;border-radius:5px;width:36px;text-align:center;outline:none;flex-shrink:0;flex-grow:0;}
-.weight-input::-webkit-inner-spin-button,.weight-input::-webkit-outer-spin-button{-webkit-appearance:none;}
-.weight-input:focus{border-color:var(--ac2);}
 
-/* SERIES — inline chips */
-.serie-chip-input{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:'IBM Plex Mono',monospace;font-size:16px;padding:3px 0;border-radius:5px;width:34px;text-align:center;text-align-last:center;outline:none;cursor:pointer;color-scheme:dark;-webkit-appearance:none;appearance:none;}
-.serie-chip-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:1px;}
-.serie-chip-num{font-size:8px;color:var(--mu);text-align:center;}
-.btn-del-serie{background:transparent;border:none;color:var(--mu);font-size:10px;cursor:pointer;padding:0;line-height:1;}
-.btn-del-serie:active{color:var(--red);}
-.btn-add-serie{background:transparent;border:1px dashed var(--bd);color:var(--mu);font-family:var(--mono);font-size:11px;padding:4px 5px;border-radius:5px;cursor:pointer;white-space:nowrap;}
-.btn-add-serie:active{border-color:var(--ac2);color:var(--ac);}
+/* -- TASK LIST -- */
+.task-list {
+  padding: 0 20px 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.task-group {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom: 10px;
+}
 
-.bdel{background:transparent;border:none;cursor:pointer;color:var(--mu);font-size:14px;padding:2px 4px;line-height:1;flex-shrink:0;}
-.bdel:active{color:var(--red);}
+/* -- TASK ROW -- */
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-bottom: 1px solid #F2F2F7;
+  transition: background 0.1s;
+  animation: rowIn 0.2s ease;
+}
+@keyframes rowIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.task-row:last-child { border-bottom: none; }
+.task-row:active { background: #F9F9F9; }
+.task-row.done { opacity: 0.45; }
+.task-row.done .task-title { text-decoration: line-through; color: #8E8E93; }
 
-/* PAST HISTORY on log page */
-.past-section{margin-top:12px;}
-.past-day{background:#1e0e0e;border:1px solid #4a1a1a;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;--sf2:#2a1818;--bd:#4a1a1a;--mu:#905050;--ac:#e07070;--tx:#e0c0c0;}
-.past-title{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--bd);}
-.past-day-lbl{font-size:11px;font-weight:600;color:#e07070;margin-bottom:0;}
+.cb {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid #C7C7CC;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.75rem;
+  color: white;
+  background: white;
+}
+.cb:active { transform: scale(0.85); }
+.cb.checked { background: #34C759; border-color: #34C759; }
 
-/* HISTORY TABLE */
-.hist-day{background:#1e0e0e;border:1px solid #4a1a1a;border-radius:var(--r);padding:12px 14px;margin-bottom:12px;--sf2:#2a1818;--bd:#4a1a1a;--mu:#905050;--ac:#e07070;--tx:#e0c0c0;}
-.hist-day-title{font-size:11px;font-weight:600;letter-spacing:.1em;color:#e07070;text-transform:uppercase;}
-.hist-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;table-layout:fixed;}
-.hist-table tr{border-bottom:1px solid var(--bd);}
-.hist-table tr:last-child{border-bottom:none;}
-.ht-name{color:var(--tx);width:15ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 10px 5px 0;font-weight:600;}
-.ht-kg{color:var(--mu);text-align:right;padding:5px 8px;white-space:nowrap;font-size:11px;width:4ch;}
-.ht-rep{color:var(--ac);text-align:right;padding:5px 6px;font-weight:600;width:3ch;}
+.priority-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pd-high   { background: #FF3B30; }
+.pd-medium { background: #FF9500; }
+.pd-low    { background: #34C759; }
 
-/* STATS */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
-.stat-card{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:14px 12px;}
-.stat-lbl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
-.stat-val{font-size:26px;font-weight:600;color:var(--ac);}
-.sec-title{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;margin-top:18px;}
-.freq-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px;}
-.freq-row:last-child{border-bottom:none;}
-.freq-cnt{color:var(--ac);font-weight:600;}
-.exo-sel{margin-bottom:12px;}
-.exo-sel select{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);font-family:var(--mono);font-size:12px;padding:8px 10px;border-radius:var(--r);width:100%;outline:none;color-scheme:dark;}
-.chart-wrap{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:14px;}
-.chart-title{font-size:11px;color:var(--tx);margin-bottom:12px;font-weight:500;}
-.chart-legend{display:flex;gap:12px;margin-top:10px;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--mu);}
-.legend-dot{width:10px;height:10px;border-radius:2px;}
+.task-body { flex: 1; min-width: 0; }
+.task-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #1C1C1E;
+  line-height: 1.3;
+}
+.task-project {
+  font-size: 0.72rem;
+  color: #8E8E93;
+  margin-top: 2px;
+  font-weight: 400;
+}
 
-.session-card{background:#161a20;border:1px solid #282e38;border-radius:var(--r);padding:8px 14px 12px;margin-bottom:12px;--sf2:#202530;--bd:#303848;--mu:#606878;--tx:#c8d0dc;}
-.empty{text-align:center;color:var(--mu);font-size:12px;padding:24px 20px 8px;line-height:1.8;}
-.copy-wrap{margin:8px 0;}
-.copy-select{width:100%;background:var(--sf2);border:1px solid var(--bd);color:var(--ac);font-family:var(--mono);font-size:12px;padding:8px 10px;border-radius:var(--r);outline:none;cursor:pointer;color-scheme:dark;-webkit-appearance:none;appearance:none;}
-.btn-fin{display:block;width:100%;margin-top:12px;background:#3a4255;color:#a8b8d0;border:1px solid #505868;font-family:var(--mono);font-size:12px;font-weight:600;padding:8px;border-radius:var(--r);cursor:pointer;letter-spacing:.06em;}
-.btn-fin:active{opacity:.8;}
-.arch-card{background:#0d2818;border-color:#2a7a50;--sf2:#1a4030;--bd:#2a7a50;--mu:#5a9a70;--ac:#5ad4a0;--tx:#c0e8d0;}
-.arch-title{font-size:11px;font-weight:600;color:#5ad4a0;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #1a4a30;}
-.btn-reopen{margin-top:10px;background:transparent;border:1px solid var(--bd);color:var(--mu);font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:4px;cursor:pointer;}
-.btn-reopen:active{border-color:var(--ac);color:var(--ac);}
-.hist-day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #3a1818;}
-.btn-del-day{background:transparent;border:none;color:#905050;font-family:var(--mono);font-size:14px;cursor:pointer;padding:0 2px;line-height:1;}
-.btn-del-day:active{color:var(--red);}
-```
+.edit-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: #F2F2F7;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  color: #8E8E93;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.edit-btn:active { background: #E5E5EA; color: #007AFF; }
 
-  </style>
+/* -- EMPTY -- */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8E8E93;
+}
+.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-title { font-size: 1rem; font-weight: 600; color: #3C3C43; margin-bottom: 4px; }
+.empty-sub { font-size: 0.82rem; }
+
+/* -- ADD BAR -- */
+.add-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: linear-gradient(180deg, rgba(255,245,245,0.97) 0%, rgba(255,235,180,0.99) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,107,107,0.15);
+  padding: 12px 20px 32px;
+  z-index: 50;
+}
+.add-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.add-input {
+  flex: 1;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.92rem;
+  color: #1C1C1E;
+  outline: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.add-input::placeholder { color: #C7C7CC; }
+.add-btn {
+  width: 44px; height: 44px;
+  background: #FF6B6B;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.add-btn:active { transform: scale(0.93); opacity: 0.85; }
+.add-opts { display: flex; gap: 8px; }
+.add-sel {
+  flex: 1;
+  background: white;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem;
+  color: #3C3C43;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+/* -- BOTTOM SHEET -- */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  display: none;
+  backdrop-filter: blur(4px);
+}
+.overlay.open { display: block; }
+
+.sheet {
+  position: fixed;
+  bottom: 0; left: 50%;
+  width: 100%; max-width: 430px;
+  background: #F2F2F7;
+  border-radius: 20px 20px 0 0;
+  padding-bottom: 34px;
+  z-index: 101;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateX(-50%) translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sheet.open { transform: translateX(-50%) translateY(0); }
+
+.sheet-handle { width: 36px; height: 4px; background: #C7C7CC; border-radius: 2px; margin: 10px auto 0; }
+.sheet-header {
+  padding: 14px 20px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sheet-title { font-size: 1.05rem; font-weight: 700; color: #1C1C1E; }
+.sheet-close {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #E5E5EA;
+  border: none;
+  color: #8E8E93;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif;
+}
+.sheet-close:active { background: #D1D1D6; }
+
+/* Sheet groups */
+.sheet-group {
+  background: white;
+  border-radius: 14px;
+  margin: 0 16px 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.sheet-group-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0 16px 6px;
+  margin-top: 4px;
+}
+.sheet-row {
+  padding: 12px 14px;
+  border-bottom: 1px solid #F2F2F7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sheet-row:last-child { border-bottom: none; }
+.sheet-row label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8E8E93;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sheet-input {
+  background: transparent;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.92rem;
+  color: #1C1C1E;
+  outline: none;
+  width: 100%;
+  padding: 0;
+}
+.sheet-input::placeholder { color: #C7C7CC; }
+
+.sheet-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.1s;
+  text-align: center;
+}
+.sheet-btn:active { opacity: 0.75; }
+.btn-blue { background: #FF6B6B; color: white; }
+.btn-green { background: #34C759; color: white; }
+.btn-red { background: #FF3B30; color: white; }
+.btn-gray { background: #E5E5EA; color: #3C3C43; }
+
+/* chips */
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
+.chip {
+  display: flex; align-items: center; gap: 5px;
+  background: #EAF3FF; color: #007AFF;
+  border-radius: 20px; padding: 5px 10px;
+  font-size: 0.78rem; font-weight: 600;
+}
+.chip-x { background: none; border: none; color: #007AFF; cursor: pointer; font-size: 0.8rem; opacity: 0.6; padding: 0; }
+.chip-x:active { opacity: 1; }
+
+.time-row { display: flex; gap: 8px; padding: 10px 14px; }
+.time-inp {
+  flex: 1;
+  background: #F2F2F7; border: none; border-radius: 10px;
+  padding: 9px 12px; font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem; color: #1C1C1E; outline: none;
+}
+.time-add-btn {
+  background: #007AFF; color: white; border: none;
+  border-radius: 10px; padding: 9px 16px;
+  font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+  font-weight: 700; cursor: pointer;
+}
+.time-add-btn:active { opacity: 0.8; }
+
+/* log */
+.log-wrap { padding: 8px 14px; display: flex; flex-direction: column; gap: 3px; max-height: 100px; overflow-y: auto; }
+.log-r { font-size: 0.7rem; color: #8E8E93; padding: 3px 0; }
+.log-r.sent { color: #34C759; }
+.log-r.sim  { color: #FF9500; }
+.log-r.err  { color: #FF3B30; }
+
+/* -- EDIT SHEET -- */
+.edit-sel {
+  background: transparent; border: none;
+  font-family: 'Outfit', sans-serif; font-size: 0.92rem;
+  color: #1C1C1E; outline: none; width: 100%; padding: 0;
+  appearance: none; -webkit-appearance: none;
+}
+
+/* -- TOAST -- */
+#toasts {
+  position: fixed; top: 60px;
+  left: 50%; transform: translateX(-50%);
+  width: calc(100% - 40px); max-width: 390px;
+  z-index: 999; display: flex; flex-direction: column; gap: 6px;
+  pointer-events: none;
+}
+.toast {
+  padding: 11px 16px; border-radius: 14px;
+  font-size: 0.83rem; font-weight: 600;
+  background: rgba(28,28,30,0.88);
+  color: white;
+  backdrop-filter: blur(10px);
+  animation: toastIn 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+@keyframes toastIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+.toast.ok  { background: rgba(52,199,89,0.92); }
+.toast.err { background: rgba(255,59,48,0.92); }
+.toast.info { background: rgba(0,122,255,0.92); }
+</style>
 </head>
 <body>
-<div class="app">
-  <div class="hdr">
-    <div class="hdr-l"><h1>Sport Log</h1><span class="ver">v12.6</span></div>
-    <div style="display:flex;gap:6px;align-items:center;">
-      <button class="sync-btn" id="sync-btn" onclick="syncNow()">↑↓ sync</button>
-      <button class="sync-btn" onclick="resetToken()">token</button>
-      <button class="sync-btn" onclick="forceUpdate()">maj</button>
+
+<!-- PROFILE SELECTOR -->
+<div id="profile-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:20px; padding:28px 24px; width:calc(100% - 48px); max-width:380px; margin:0 auto;">
+    <div style="font-size:1.4rem; font-weight:800; color:#1C1C1E; margin-bottom:6px;">La To Do du Bonheur</div>
+    <div style="font-size:0.85rem; color:#8E8E93; margin-bottom:24px;">Qui es-tu ?</div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button onclick="selectProfile('napo')" style="background:linear-gradient(135deg,#FF6B6B,#FFD93D); color:white; border:none; border-radius:14px; padding:16px; font-size:1rem; font-weight:800; cursor:pointer;">🙋 Napo</button>
+      <button onclick="selectProfile('bitchoun')" style="background:linear-gradient(135deg,#FFD93D,#6BCB77); color:white; border:none; border-radius:14px; padding:16px; font-size:1rem; font-weight:800; cursor:pointer;">🙋 Bitchoun</button>
     </div>
   </div>
-  <div class="tabs">
-    <div class="tab active" id="tab-log" onclick="showTab('log')">Log</div>
-    <div class="tab" id="tab-history" onclick="showTab('history')">Historique</div>
-    <div class="tab" id="tab-stats" onclick="showTab('stats')">Stats</div>
-  </div>
-  <div class="content" id="content"></div>
 </div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+<div class="app-title" style="text-transform:uppercase; letter-spacing:1px; font-size:1.4rem;">La To Do du Bonheur</div>
+    <div class="header-actions">
+      <button class="hbtn" onclick="location.reload(true)" title="Rafraîchir">🔄</button>
+      <button class="hbtn" onclick="showProfileSelector()" title="Changer de profil">👤</button>
+      <button class="hbtn" onclick="openSettings()">⚙️</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- HIDDEN STATS FOR JS -->
+<div style="display:none">
+  <span id="s-total"></span><span id="s-done"></span><span id="s-high"></span>
+  <span id="subtitle"></span><span id="section-head"></span>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="fbtn active" onclick="setFilter('all',this)">Toutes</button>
+  <button class="fbtn" onclick="setFilter('me',this)">Moi</button>
+  <button class="fbtn" id="filter-both-btn" onclick="setFilter('both',this)"></button>
+  <button class="fbtn" id="filter-contact-btn" onclick="setFilter('contact',this)"></button>
+</div>
+
+<!-- TASKS -->
+<div id="sync-indicator" style="display:none; text-align:center; padding:8px; font-size:0.78rem; color:#8E8E93;">
+  ⏳ Vérification des emails…
+</div>
+<div id="done-bar" style="display:none; padding:4px 20px 8px; text-align:right;">
+  <button onclick="clearDone()" style="background:none; border:none; font-size:0.78rem; color:#FF3B30; cursor:pointer; font-family:'Outfit',sans-serif; font-weight:600;">🗑 Supprimer les tâches faites</button>
+</div>
+<div class="task-list" id="task-list"></div>
+
+<!-- ADD BAR -->
+<div class="add-bar">
+  <div class="add-row">
+    <input class="add-input" id="new-title" type="text" placeholder="Nouvelle tâche…" onkeydown="if(event.key==='Enter') addTask()">
+    <button class="add-btn" onclick="addTask()">＋</button>
+  </div>
+  <div class="add-opts">
+    <select class="add-sel" id="new-priority">
+      <option value="medium">🟡 Moyen</option>
+      <option value="high">🔴 Urgent</option>
+      <option value="low">🟢 Faible</option>
+    </select>
+    <input class="add-sel" type="text" id="new-project" placeholder="Projet…" style="font-size:0.82rem; flex:1; min-width:0;">
+    <select class="add-sel" id="new-assignee" style="font-size:0.82rem; flex:1; min-width:0;" onchange="onAssigneeChange(this)"></select>
+  </div>
+  <div id="add-bar-contact-form" style="display:none; margin-top:8px; padding:12px; background:white; border-radius:10px; border:1px solid #E8E8E4;">
+    <div style="font-size:0.75rem; font-weight:700; color:#6C6C68; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Nouveau contact</div>
+    <input type="text" id="add-contact-name" placeholder="Nom" style="width:100%; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:8px; padding:9px 10px; font-size:0.85rem; color:#1C1C1E; outline:none; margin-bottom:6px;">
+    <input type="email" id="add-contact-email" placeholder="email@exemple.com" style="width:100%; background:#F2F2F7; border:1px solid #E8E8E4; border-radius:8px; padding:9px 10px; font-size:0.85rem; color:#1C1C1E; outline:none; margin-bottom:6px;">
+    <input type="hidden" id="add-contact-type" value="email">
+    <input type="hidden" id="add-contact-repo" value="">
+    <button onclick="saveContactForm()" style="width:100%; background:#1C1C1E; color:white; border:none; border-radius:8px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">Ajouter</button>
+  </div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div class="overlay" id="s-overlay" onclick="closeSettings()"></div>
+<div class="sheet" id="s-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Paramètres</span>
+    <button class="sheet-close" onclick="closeSettings()">✕</button>
+  </div>
+
+
+
+  <div class="sheet-group-label">Token GitHub</div>
+  <div class="sheet-group" id="token-box">
+    <div class="sheet-row">
+      <label>Token</label>
+      <input class="sheet-input" type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+  </div>
+  <button class="sheet-btn btn-blue" id="save-btn" onclick="saveConfig()">Sauvegarder le token</button>
+
+
+
+</div>
+
+<!-- EDIT OVERLAY -->
+<div class="overlay" id="e-overlay" onclick="closeEdit()"></div>
+<div class="sheet" id="e-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Modifier</span>
+    <button class="sheet-close" onclick="closeEdit()">✕</button>
+  </div>
+  <div class="sheet-group">
+    <div class="sheet-row"><label>Titre</label><input class="sheet-input" type="text" id="e-title" placeholder="Titre de la tâche"></div>
+    <div class="sheet-row">
+      <label>Priorité</label>
+      <select class="edit-sel" id="e-priority">
+        <option value="medium">🟡 Priorité moyenne</option>
+        <option value="high">🔴 Urgent</option>
+        <option value="low">🟢 Faible</option>
+      </select>
+    </div>
+    <div class="sheet-row"><label>Projet</label><input class="sheet-input" type="text" id="e-project" placeholder="Nom du projet"></div>
+    <div class="sheet-row" style="gap:6px;">
+      <label>Assigner à</label>
+      <select class="sheet-input" id="e-assignee" style="padding:6px 8px;" onchange="onAssigneeChange(this)"></select>
+    </div>
+    <div id="inline-contact-form" style="display:none; padding:10px 14px; background:#F2F2F7; border-radius:8px; margin:0 0 8px; gap:6px; flex-direction:column;">
+      <input class="sheet-input" type="text" id="contact-name" placeholder="Nom du contact" style="margin-bottom:6px;">
+      <select id="contact-type" class="sheet-input" style="margin-bottom:6px;">
+        <option value="repo">Dépôt GitHub</option>
+        <option value="email">Email</option>
+      </select>
+      <input class="sheet-input" type="text" id="contact-repo" placeholder="ex: tdb" style="margin-bottom:0;">
+      <input class="sheet-input" type="email" id="contact-email" placeholder="email@exemple.com" style="display:none;">
+      <button onclick="saveContactForm()" style="background:#1C1C1E;color:white;border:none;border-radius:8px;padding:8px;font-size:0.82rem;font-weight:700;cursor:pointer;margin-top:2px;">Ajouter le contact</button>
+    </div>
+  </div>
+  <button class="sheet-btn btn-blue" onclick="saveEdit()">Enregistrer</button>
+  <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
+</div>
+
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.6</div>
+
+<div id="toasts"></div>
+
 <script>
-const OWNER='napolsg',REPO='sport-log',FILE='data.json';
-const DAYS=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-const MONTHS=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
-let sessions={},savedExos=[],currentDate=todayKey(),activeTab='log',saveTimer=null;
-let tInterval=null,tSecs=90,tRunning=false,tTarget=90,activeStatsExo=null;
-let ghToken=null,fileSha=null,syncing=false;
-
-function todayKey(){return new Date().toISOString().slice(0,10);}
-function fmtKey(k){const d=new Date(k+‘T12:00:00’);return DAYS[d.getDay()]+’ ‘+d.getDate()+’ ‘+MONTHS[d.getMonth()]+’ ‘+d.getFullYear();}
-function fmtS(k){const d=new Date(k+‘T12:00:00’);return DAYS[d.getDay()]+’ ‘+d.getDate()+’ ‘+MONTHS[d.getMonth()];}
-function esc(s){return String(s).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);}
-function getSess(d){if(!sessions[d])sessions[d]={exercises:[]};return sessions[d];}
-
-// STORAGE
-function loadLocal(){
-try{const r=localStorage.getItem(‘sl_v4’);if(r){const p=JSON.parse(r);sessions=p.sessions||{};savedExos=p.savedExos||[];fileSha=p.fileSha||null;}}catch(e){}
-ghToken=localStorage.getItem(‘sl_token’);
-}
-function saveLocal(){try{localStorage.setItem(‘sl_v4’,JSON.stringify({sessions,savedExos,fileSha}));}catch(e){}}
-function scheduleSave(){
-if(saveTimer)clearTimeout(saveTimer);
-saveTimer=setTimeout(()=>{saveLocal();autoSync();},800);
-}
-
-// GITHUB SYNC
-async function syncNow(){
-if(!ghToken||ghToken===‘SKIP’){render();return;}
-if(syncing)return;
-setSyncState(‘syncing’,‘↻ sync…’);
-try{
-const res=await fetch(‘https://api.github.com/repos/’+OWNER+’/’+REPO+’/contents/’+FILE,{
-headers:{‘Authorization’:‘token ‘+ghToken,‘Accept’:‘application/vnd.github.v3+json’}
-});
-if(res.ok){
-const json=await res.json();
-fileSha=json.sha;
-const remote=JSON.parse(atob(json.content.replace(/\n/g,’’)));
-const today=todayKey();
-const merged=Object.assign({},remote.sessions||{});
-if(sessions[today]&&sessions[today].exercises&&sessions[today].exercises.length>0)merged[today]=sessions[today];
-sessions=merged;
-savedExos=Array.from(new Set([…(remote.savedExos||[]),…savedExos]));
-} else if(res.status!==404){throw new Error(‘HTTP ‘+res.status);}
-await pushToGitHub();
-setSyncState(‘ok’,‘↑↓ sync’);
-saveLocal();render();
-}catch(e){setSyncState(‘error’,’! erreur’);setTimeout(()=>setSyncState(‘ok’,‘↑↓ sync’),3000);}
-}
-async function autoSync(){if(!ghToken||ghToken===‘SKIP’||syncing)return;await pushToGitHub();}
-async function pushToGitHub(){
-if(!ghToken||ghToken===‘SKIP’)return;
-syncing=true;setSyncState(‘syncing’,’… sync’);
-try{
-const content=btoa(unescape(encodeURIComponent(JSON.stringify({sessions,savedExos},null,2))));
-const body={message:‘update’,content};if(fileSha)body.sha=fileSha;
-const res=await fetch(‘https://api.github.com/repos/’+OWNER+’/’+REPO+’/contents/’+FILE,{
-method:‘PUT’,headers:{‘Authorization’:‘token ‘+ghToken,‘Accept’:‘application/vnd.github.v3+json’,‘Content-Type’:‘application/json’},
-body:JSON.stringify(body)
-});
-if(!res.ok)throw new Error(‘HTTP ‘+res.status);
-const json=await res.json();fileSha=json.content.sha;saveLocal();setSyncState(‘ok’,‘↑↓ sync’);
-}catch(e){setSyncState(‘error’,’! erreur’);setTimeout(()=>setSyncState(‘ok’,‘↑↓ sync’),3000);}
-syncing=false;
-}
-function setSyncState(state,label){const btn=document.getElementById(‘sync-btn’);if(!btn)return;btn.textContent=label;btn.className=‘sync-btn’+(state===‘syncing’?’ syncing’:state===‘error’?’ error’:’’);}
-
-// SETUP
-function renderSetup(){
-const c=document.getElementById(‘content’);c.innerHTML=’’;
-const div=document.createElement(‘div’);div.className=‘setup’;
-div.innerHTML=’<h2>CONFIGURATION</h2><p>Entre ton token GitHub pour sauvegarder les donnees sur le repo sport-log.</p><input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"><button class="btn-primary" onclick="saveToken()">Enregistrer et synchroniser</button><p class="note">Token stocke uniquement sur cet appareil. Droits repo requis.</p><div style="text-align:center"><button style="background:transparent;border:none;color:var(--mu);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:underline;margin-top:8px" onclick="skipSetup()">Continuer sans sync</button></div>’;
-c.appendChild(div);
-}
-function saveToken(){const val=document.getElementById(‘token-input’).value.trim();if(!val)return;ghToken=val;localStorage.setItem(‘sl_token’,val);syncNow();}
-function skipSetup(){localStorage.setItem(‘sl_token’,‘SKIP’);ghToken=‘SKIP’;showTab(‘log’);}
-function resetToken(){if(!confirm(‘Reinitialiser le token ?’))return;localStorage.removeItem(‘sl_token’);ghToken=null;render();}
-
-// TABS
-function showTab(t){activeTab=t;[‘log’,‘history’,‘stats’].forEach(id=>document.getElementById(‘tab-’+id).classList.toggle(‘active’,id===t));render();}
-function render(){
-if(!ghToken){renderSetup();return;}
-if(activeTab===‘log’)renderLog();
-else if(activeTab===‘history’)renderHistory();
-else renderStats();
-}
-
-// TIMER — countdown only
-function tFmt(s){const m=Math.floor(Math.abs(s)/60),sc=Math.abs(s)%60;return String(m).padStart(2,‘0’)+’:’+String(sc).padStart(2,‘0’);}
-function startTimer(target){
-stopTimer();
-tTarget=target;tSecs=target;activePreset=target;
-updT();
-tRunning=true;
-tInterval=setInterval(()=>{
-tSecs–;updT();
-if(tSecs<=0){beep();stopTimer();}
-},1000);
-updTimerBtns();
-}
-function stopTimer(){tRunning=false;clearInterval(tInterval);updTimerBtns();}
-function resetTimer(){stopTimer();tSecs=tTarget;updT();}
-function updT(){
-const mEl=document.getElementById(‘td-min’),sEl=document.getElementById(‘td-sec’),sel=document.getElementById(‘timer-sel’),colon=document.getElementById(‘td-colon’);
-if(!mEl||!sEl)return;
-const s=Math.max(0,tSecs);
-mEl.textContent=String(Math.floor(s/60)).padStart(2,‘0’);
-sEl.textContent=String(s%60).padStart(2,‘0’);
-const cls=‘td-part’+(tRunning?’ run’:’’)+(tSecs<=5&&tRunning?’ alr’:’’);
-mEl.className=cls;sEl.className=cls;
-if(colon)colon.className=‘td-colon’+(tRunning?’ run’:’’)+(tSecs<=5&&tRunning?’ alr’:’’);
-// Show dropdown when stopped, countdown when running
-if(sel){sel.style.display=tRunning?‘none’:‘block’;}
-mEl.style.display=tRunning?‘inline’:‘none’;
-sEl.style.display=tRunning?‘inline’:‘none’;
-if(colon)colon.style.display=tRunning?‘inline’:‘none’;
-}
-function updTimerBtns(){
-const bs=document.getElementById(‘bt-s’),br=document.getElementById(‘bt-r’);
-if(bs)bs.className=‘bt’+(tRunning?’ on’:’’);
-if(br)br.className=‘bt’;
-}
-function beep(){
-try{
-const c=new(window.AudioContext||window.webkitAudioContext)();
-const now=c.currentTime;
-// Three rising tones
-[[880,0],[1100,0.4],[1320,0.8]].forEach(([freq,t])=>{
-const o=c.createOscillator(),g=c.createGain();
-o.connect(g);g.connect(c.destination);
-o.frequency.value=freq;o.type=‘sine’;
-g.gain.setValueAtTime(0,now+t);
-g.gain.linearRampToValueAtTime(0.4,now+t+0.05);
-g.gain.exponentialRampToValueAtTime(0.001,now+t+0.35);
-o.start(now+t);o.stop(now+t+0.35);
-});
-}catch(e){}
-}
-
-function renderTimerWidget(){
-const div=document.createElement(‘div’);div.className=‘timer-bar’;
-const row=document.createElement(‘div’);row.className=‘timer-top’;
-
-// Fixed-width display zone
-const displayZone=document.createElement(‘div’);displayZone.style.cssText=‘width:100px;height:40px;flex-shrink:0;display:flex;align-items:center;’;
-
-// Dropdown
-const sel=document.createElement(‘select’);sel.className=‘timer-sel’;sel.id=‘timer-sel’;
-[[60,‘1:00’],[90,‘1:30’],[120,‘2:00’],[150,‘2:30’],[180,‘3:00’],[240,‘4:00’],[300,‘5:00’],[360,‘6:00’],[420,‘7:00’],[480,‘8:00’],[600,‘10:00’]].forEach(([s,lbl])=>{
-const o=document.createElement(‘option’);o.value=s;o.textContent=lbl;
-if(s===tTarget)o.selected=true;
-sel.appendChild(o);
-});
-sel.addEventListener(‘change’,()=>{const s=parseInt(sel.value);stopTimer();tSecs=s;tTarget=s;updT();});
-
-// Countdown spans — hidden by default
-const mEl=document.createElement(‘span’);mEl.className=‘td-part’;mEl.id=‘td-min’;mEl.style.display=‘none’;
-const colon=document.createElement(‘span’);colon.className=‘td-colon’;colon.id=‘td-colon’;colon.textContent=’:’;colon.style.display=‘none’;
-const sEl=document.createElement(‘span’);sEl.className=‘td-part’;sEl.id=‘td-sec’;sEl.style.display=‘none’;
-
-displayZone.appendChild(sel);displayZone.appendChild(mEl);displayZone.appendChild(colon);displayZone.appendChild(sEl);
-
-// Buttons
-const bStart=document.createElement(‘button’);bStart.className=‘bt on’;bStart.id=‘bt-s’;bStart.textContent=‘Start’;
-bStart.onclick=()=>{if(tRunning)stopTimer();else{if(tSecs<=0)tSecs=tTarget;startTimer(tSecs);}};
-const bReset=document.createElement(‘button’);bReset.className=‘bt’;bReset.id=‘bt-r’;bReset.textContent=‘Reset’;
-bReset.onclick=()=>resetTimer();
-
-row.appendChild(displayZone);row.appendChild(bStart);row.appendChild(bReset);
-div.appendChild(row);
-updT();updTimerBtns();
-return div;
-}
-// LOG
-function renderLog(){
-const sess=getSess(currentDate),c=document.getElementById(‘content’);c.innerHTML=’’;
-
-// Timer
-c.appendChild(renderTimerWidget());
-
-if(sess.done){
-// Session archived — show summary card only
-const archCard=document.createElement(‘div’);archCard.className=‘session-card arch-card’;
-const archTitle=document.createElement(‘div’);archTitle.className=‘arch-title’;archTitle.textContent=‘Séance du ‘+fmtS(currentDate)+’ — terminée’;
-archCard.appendChild(archTitle);
-let t=’<table class="hist-table">’;
-sess.exercises.forEach(exo=>{
-t+=’<tr><td class="ht-name">’+esc(exo.name)+’</td><td class="ht-kg">’+(exo.kg?exo.kg+‘kg’:’’)+’</td>’;
-exo.series.forEach(s=>{t+=’<td class="ht-rep">’+(s.reps||’—’)+’</td>’;});
-t+=’</tr>’;
-});
-t+=’</table>’;
-const tbl=document.createElement(‘div’);tbl.innerHTML=t;archCard.appendChild(tbl);
-const reopenBtn=document.createElement(‘button’);reopenBtn.className=‘btn-reopen’;reopenBtn.textContent=‘Modifier’;
-reopenBtn.addEventListener(‘click’,()=>{getSess(currentDate).done=false;scheduleSave();renderLog();});
-archCard.appendChild(reopenBtn);
-const delArchBtn=document.createElement(‘button’);delArchBtn.className=‘btn-del-day’;delArchBtn.textContent=‘✕’;
-delArchBtn.addEventListener(‘click’,()=>{delete sessions[currentDate];scheduleSave();renderLog();});
-archCard.appendChild(delArchBtn);
-c.appendChild(archCard);
-} else {
-// Active session card
-const sessionCard=document.createElement(‘div’);sessionCard.className=‘session-card’;
-// Date
-const db2=document.createElement(‘div’);db2.className=‘day-label’;
-db2.innerHTML=’<input type="date" id="dp" value="'+currentDate+'" max="'+todayKey()+'">’;
-sessionCard.appendChild(db2);
-// Save status
-const ss=document.createElement(‘div’);ss.className=‘save-st’;ss.id=‘save-st’;sessionCard.appendChild(ss);
-// Add exercise row
-const ar=document.createElement(‘div’);ar.className=‘add-exo’;
-ar.innerHTML=’<div class="exo-wrap"><input type="text" id="nei" placeholder="Ajouter un exercice..." autocomplete="off" autocorrect="off"><div class="dropdown" id="dd" style="display:none;"></div></div><button class="btn-acc" onclick="addExo()">+</button>’;
-sessionCard.appendChild(ar);
-c.appendChild(sessionCard);
-document.getElementById(‘dp’).addEventListener(‘change’,e=>{currentDate=e.target.value;renderLog();});
-const inp=document.getElementById(‘nei’);
-inp.addEventListener(‘input’,updDD);inp.addEventListener(‘focus’,updDD);
-inp.addEventListener(‘keydown’,e=>{if(e.key===‘Enter’)addExo();if(e.key===‘Escape’)hideDD();});
-// Exercises or empty state
-if(sess.exercises.length===0){
-const em=document.createElement(‘div’);em.className=‘empty’;
-em.innerHTML=‘Aucun exercice.<br>Ajoute-en un ci-dessus.’;
-sessionCard.appendChild(em);
-const lastKeys=Object.keys(sessions).filter(k=>k<currentDate&&sessions[k].exercises&&sessions[k].exercises.length>0).sort((a,b)=>b.localeCompare(a)).slice(0,2);
-if(lastKeys.length>0){
-const copyWrap=document.createElement(‘div’);copyWrap.className=‘copy-wrap’;
-const sel=document.createElement(‘select’);sel.className=‘copy-select’;
-const dflt=document.createElement(‘option’);dflt.value=’’;dflt.textContent=‘Copier une séance…’;sel.appendChild(dflt);
-lastKeys.forEach(k=>{
-const o=document.createElement(‘option’);o.value=k;o.textContent=fmtS(k);sel.appendChild(o);
-});
-sel.addEventListener(‘change’,()=>{
-const k=sel.value;if(!k)return;
-const s=getSess(currentDate);
-s.exercises=sessions[k].exercises.map(e=>({name:e.name,kg:e.kg||’’,series:[{reps:’’},{reps:’’},{reps:’’}]}));
-s.done=false;scheduleSave();renderLog();
-});
-copyWrap.appendChild(sel);
-sessionCard.appendChild(copyWrap);
-}
-} else {
-sess.exercises.forEach((exo,ei)=>sessionCard.appendChild(buildExoCard(exo,ei)));
-}
-// Fin de séance at bottom
-const finBtn=document.createElement(‘button’);finBtn.className=‘btn-fin’;finBtn.textContent=‘Fin de séance’;
-finBtn.onclick=()=>{if(sess.exercises.length===0)return;sess.done=true;scheduleSave();renderLog();};
-sessionCard.appendChild(finBtn);
-}
-// Past history
-const pastKeys=Object.keys(sessions).filter(k=>k<currentDate&&sessions[k].exercises&&sessions[k].exercises.length>0).sort((a,b)=>b.localeCompare(a));
-if(pastKeys.length>0){
-const ps=document.createElement(‘div’);ps.className=‘past-section’;
-ps.innerHTML=’<div class="past-title">Historique des séances</div>’;
-pastKeys.forEach(k=>{
-const s2=sessions[k],dd=document.createElement(‘div’);dd.className=‘past-day’;
-const phdr=document.createElement(‘div’);phdr.className=‘hist-day-header’;
-const plbl=document.createElement(‘span’);plbl.className=‘past-day-lbl’;plbl.textContent=fmtS(k);
-const pDel=document.createElement(‘button’);pDel.className=‘btn-del-day’;pDel.textContent=‘✕’;
-pDel.addEventListener(‘click’,()=>{delete sessions[k];scheduleSave();renderLog();});
-phdr.appendChild(plbl);phdr.appendChild(pDel);
-dd.appendChild(phdr);
-let t=’<table class="hist-table">’;
-s2.exercises.forEach(exo=>{
-t+=’<tr><td class="ht-name">’+esc(exo.name)+’</td><td class="ht-kg">’+(exo.kg?exo.kg+‘kg’:’’)+’</td>’;
-exo.series.forEach(s=>{t+=’<td class="ht-rep">’+(s.reps||’—’)+’</td>’;});
-t+=’</tr>’;
-});
-t+=’</table>’;
-const tbl=document.createElement(‘div’);tbl.innerHTML=t;dd.appendChild(tbl);
-ps.appendChild(dd);
-});
-c.appendChild(ps);
-}
-
-}
-
-function buildExoCard(exo,ei){
-const card=document.createElement(‘div’);card.className=‘exo-card’;
-const row=document.createElement(‘div’);row.className=‘exo-row’;row.id=‘sl-’+ei;
-const nameSpan=document.createElement(‘span’);nameSpan.className=‘exo-name’;nameSpan.textContent=exo.name;
-const wInp=document.createElement(‘input’);wInp.type=‘number’;wInp.className=‘weight-input’;wInp.inputMode=‘decimal’;wInp.min=‘0’;wInp.step=‘0.5’;wInp.placeholder=‘kg’;wInp.value=exo.kg||’’;
-wInp.addEventListener(‘input’,()=>{exo.kg=wInp.value;scheduleSave();});
-const nameWrap=document.createElement(‘div’);nameWrap.className=‘exo-name-wrap’;
-nameWrap.appendChild(nameSpan);
-row.appendChild(nameWrap);
-row.appendChild(wInp);
-const chipsWrap=document.createElement(‘div’);chipsWrap.className=‘exo-chips-wrap’;
-exo.series.forEach((s,si)=>{chipsWrap.appendChild(buildSerieChip(exo,ei,si));});
-const addBtn=document.createElement(‘button’);addBtn.className=‘btn-add-serie’;addBtn.textContent=’+’;
-addBtn.onclick=()=>{exo.series.push({reps:’’});scheduleSave();const sl=document.getElementById(‘sl-’+ei);if(sl){sl.querySelector(’.exo-chips-wrap’).insertBefore(buildSerieChip(exo,ei,exo.series.length-1),addBtn);}};
-chipsWrap.appendChild(addBtn);
-const moveWrap=document.createElement(‘div’);moveWrap.className=‘bmove’;
-const upBtn=document.createElement(‘button’);upBtn.textContent=‘▲’;upBtn.style.cssText=‘background:transparent;border:none;cursor:pointer;color:var(–mu);font-size:10px;padding:1px;line-height:1;font-family:var(–mono);’;
-upBtn.onclick=()=>{const exos=getSess(currentDate).exercises;if(ei===0)return;[exos[ei-1],exos[ei]]=[exos[ei],exos[ei-1]];scheduleSave();renderLog();};
-const downBtn=document.createElement(‘button’);downBtn.textContent=‘▼’;downBtn.style.cssText=‘background:transparent;border:none;cursor:pointer;color:var(–mu);font-size:10px;padding:1px;line-height:1;font-family:var(–mono);’;
-downBtn.onclick=()=>{const exos=getSess(currentDate).exercises;if(ei===exos.length-1)return;[exos[ei+1],exos[ei]]=[exos[ei],exos[ei+1]];scheduleSave();renderLog();};
-moveWrap.appendChild(upBtn);moveWrap.appendChild(downBtn);
-const delBtn=document.createElement(‘button’);delBtn.className=‘bdel’;delBtn.textContent=‘✕’;
-delBtn.onclick=()=>{getSess(currentDate).exercises.splice(ei,1);scheduleSave();renderLog();};
-row.appendChild(chipsWrap);row.appendChild(moveWrap);row.appendChild(delBtn);
-card.appendChild(row);
-return card;
-}
-function buildSerieChip(exo,ei,si){
-const wrap=document.createElement(‘div’);wrap.className=‘serie-chip-wrap’;wrap.id=‘sc-’+ei+’-’+si;
-const num=document.createElement(‘span’);num.className=‘serie-chip-num’;num.textContent=si+1;
-const sel=document.createElement(‘select’);sel.className=‘serie-chip-input’;
-const dflt=document.createElement(‘option’);dflt.value=’’;dflt.textContent=’’;dflt.disabled=true;dflt.selected=!exo.series[si].reps;sel.appendChild(dflt);
-for(let i=1;i<=50;i++){const o=document.createElement(‘option’);o.value=i;o.textContent=i;if(String(i)===String(exo.series[si].reps))o.selected=true;sel.appendChild(o);}
-sel.addEventListener(‘change’,()=>{exo.series[si].reps=sel.value;scheduleSave();});
-const delBtn=document.createElement(‘button’);delBtn.className=‘btn-del-serie’;delBtn.textContent=‘✕’;
-delBtn.onclick=()=>{
-if(exo.series.length===1)return;
-exo.series.splice(si,1);scheduleSave();
-const sl=document.getElementById(‘sl-’+ei);
-if(sl){
-const cw=sl.querySelector(’.exo-chips-wrap’);
-if(cw){Array.from(cw.querySelectorAll(’.serie-chip-wrap’)).forEach(n=>n.remove());exo.series.forEach((s,i)=>cw.insertBefore(buildSerieChip(exo,ei,i),cw.querySelector(’.btn-add-serie’)));}
-}
-};
-wrap.appendChild(num);wrap.appendChild(sel);wrap.appendChild(delBtn);
-return wrap;
-}
-function updDD(){
-const inp=document.getElementById(‘nei’),dd=document.getElementById(‘dd’);if(!inp||!dd)return;
-const val=inp.value.trim().toLowerCase();
-const matches=savedExos.filter(e=>!val||e.toLowerCase().includes(val));
-if(matches.length===0&&!val){dd.style.display=‘none’;return;}
-dd.style.display=‘block’;dd.innerHTML=’’;
-matches.forEach(name=>{
-const item=document.createElement(‘div’);item.className=‘ddi’;
-item.innerHTML=’<span>’+esc(name)+’</span><span class="ddx">✕</span>’;
-[‘mousedown’,‘touchstart’].forEach(ev=>{
-item.querySelector(’.ddx’).addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();savedExos=savedExos.filter(x=>x!==name);updDD();});
-item.addEventListener(ev,e=>{if(e.target.classList.contains(‘ddx’))return;e.preventDefault();inp.value=name;hideDD();addExo();});
-});
-dd.appendChild(item);
-});
-if(val&&!savedExos.map(e=>e.toLowerCase()).includes(val)){
-const item=document.createElement(‘div’);item.className=‘ddi new’;item.textContent=’+ Ajouter “’+inp.value.trim()+’”’;
-[‘mousedown’,‘touchstart’].forEach(function(ev){item.addEventListener(ev,function(e){e.preventDefault();addExo();});});dd.appendChild(item);
-}
-}
-function hideDD(){const dd=document.getElementById(‘dd’);if(dd)dd.style.display=‘none’;}
-function addExo(){
-const inp=document.getElementById(‘nei’);const name=inp.value.trim();if(!name)return;
-if(!savedExos.includes(name))savedExos.push(name);
-getSess(currentDate).exercises.push({name,kg:’’,series:[{reps:’’},{reps:’’},{reps:’’}]});
-inp.value=’’;hideDD();scheduleSave();renderLog();
-setTimeout(()=>{const cards=document.querySelectorAll(’.exo-card’);if(cards.length)cards[cards.length-1].scrollIntoView({behavior:‘smooth’,block:‘start’});},60);
-}
-
-// HISTORY
-function renderHistory(){
-const c=document.getElementById(‘content’);c.innerHTML=’’;
-const keys=Object.keys(sessions).filter(k=>sessions[k].exercises&&sessions[k].exercises.length>0).sort((a,b)=>b.localeCompare(a));
-if(keys.length===0){c.innerHTML=’<div class="empty">Aucune séance enregistrée.</div>’;return;}
-keys.forEach(k=>{
-const block=document.createElement(‘div’);block.className=‘hist-day session-card’;
-const hdr=document.createElement(‘div’);hdr.className=‘hist-day-header’;
-const ttl=document.createElement(‘span’);ttl.className=‘hist-day-title’;ttl.textContent=fmtKey(k);
-const delDay=document.createElement(‘button’);delDay.className=‘btn-del-day’;delDay.textContent=‘✕’;
-delDay.addEventListener(‘click’,()=>{delete sessions[k];scheduleSave();renderHistory();});
-hdr.appendChild(ttl);hdr.appendChild(delDay);
-block.appendChild(hdr);
-let t=’<table class="hist-table">’;
-sessions[k].exercises.forEach(exo=>{
-t+=’<tr><td class="ht-name">’+esc(exo.name)+’</td><td class="ht-kg">’+(exo.kg?exo.kg+‘kg’:’’)+’</td>’;
-exo.series.forEach(s=>{t+=’<td class="ht-rep">’+(s.reps||’—’)+’</td>’;});
-t+=’</tr>’;
-});
-t+=’</table>’;
-const tbl=document.createElement(‘div’);tbl.innerHTML=t;block.appendChild(tbl);
-c.appendChild(block);
-});
-}
-
-// STATS
-function renderStats(){
-const c=document.getElementById(‘content’);c.innerHTML=’’;
-const keys=Object.keys(sessions).filter(k=>sessions[k].exercises&&sessions[k].exercises.length>0);
-let totalSeries=0,totalReps=0;const exoCount={};
-keys.forEach(k=>{sessions[k].exercises.forEach(exo=>{exoCount[exo.name]=(exoCount[exo.name]||0)+1;exo.series.forEach(s=>{totalSeries++;if(s.reps)totalReps+=parseInt(s.reps)||0;});});});
-const topExo=Object.entries(exoCount).sort((a,b)=>b[1]-a[1]);
-const g=document.createElement(‘div’);g.className=‘stat-grid’;
-g.innerHTML=’<div class="stat-card"><div class="stat-lbl">Séances</div><div class="stat-val">’+keys.length+’</div></div><div class="stat-card"><div class="stat-lbl">Series</div><div class="stat-val">’+totalSeries+’</div></div><div class="stat-card"><div class="stat-lbl">Répétitions</div><div class="stat-val">’+totalReps+’</div></div><div class="stat-card"><div class="stat-lbl">Exercices</div><div class="stat-val">’+Object.keys(exoCount).length+’</div></div>’;
-c.appendChild(g);
-if(topExo.length===0){const em=document.createElement(‘div’);em.className=‘empty’;em.textContent=‘Pas encore de données.’;c.appendChild(em);return;}
-const sw=document.createElement(‘div’);sw.className=‘exo-sel’;
-sw.innerHTML=’<select id="ss"><option value="">– Choisir un exercice –</option>’+topExo.map(([n])=>’<option value=”’+esc(n)+’”’+(n===activeStatsExo?’ selected’:’’)+’>’+esc(n)+’</option>’).join(’’)+’</select>’;
-c.appendChild(sw);
-const ca=document.createElement(‘div’);ca.id=‘ca’;c.appendChild(ca);
-document.getElementById(‘ss’).addEventListener(‘change’,e=>{activeStatsExo=e.target.value;renderChart(activeStatsExo);});
-if(activeStatsExo)renderChart(activeStatsExo);
-const ft=document.createElement(‘div’);ft.className=‘sec-title’;ft.textContent=‘Exercices fréquents’;c.appendChild(ft);
-topExo.slice(0,10).forEach(([n,v])=>{const r=document.createElement(‘div’);r.className=‘freq-row’;r.innerHTML=’<span>’+esc(n)+’</span><span class="freq-cnt">’+v+‘x</span>’;c.appendChild(r);});
-}
-
-function renderChart(name){
-const area=document.getElementById(‘ca’);if(!area||!name)return;area.innerHTML=’’;
-const keys=Object.keys(sessions).filter(k=>sessions[k].exercises&&sessions[k].exercises.some(e=>e.name===name)).sort((a,b)=>a.localeCompare(b));
-const pts=keys.map(k=>{const exo=sessions[k].exercises.find(e=>e.name===name);const tot=exo.series.reduce((s,r)=>s+(parseInt(r.reps)||0),0);const mx=Math.max(…exo.series.map(r=>parseInt(r.reps)||0));return{date:fmtS(k),tot,mx};});
-if(pts.length===0)return;
-const W=320,H=120,PL=28,PR=10,PT=10,PB=30,cW=W-PL-PR,cH=H-PT-PB;
-const maxVal=Math.max(…pts.map(d=>d.tot),1);
-const barW=Math.min(28,cW/pts.length*0.6),step=cW/pts.length;
-let bars=’’,line=’’,dots=’’,labels=’’,yAxis=’’;
-pts.forEach((d,i)=>{
-const x=PL+i*step+step/2,bH=(d.tot/maxVal)*cH;
-bars+=’<rect x="'+(x-barW/2).toFixed(1)+'" y="'+(PT+cH-bH).toFixed(1)+'" width="'+barW+'" height="'+bH.toFixed(1)+'" rx="3" fill="rgba(168,216,168,0.45)" stroke="#a8d8a8" stroke-width="1"/>’;
-const dy=(PT+cH-(d.mx/maxVal)*cH).toFixed(1);
-if(i===0)line+=‘M’+x.toFixed(1)+’,’+dy;else line+=’ L’+x.toFixed(1)+’,’+dy;
-dots+=’<circle cx="'+x.toFixed(1)+'" cy="'+dy+'" r="3.5" fill="#e07a7a"/>’;
-labels+=’<text x="'+x.toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" fill="#8888a8" font-size="8" font-family="monospace">’+esc(d.date)+’</text>’;
-});
-for(let i=0;i<=4;i++){const y=(PT+cH*(1-i/4)).toFixed(1),val=Math.round(maxVal*i/4);yAxis+=’<line x1="'+PL+'" y1="'+y+'" x2="'+(W-PR)+'" y2="'+y+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/><text x="'+(PL-3)+'" y="'+(parseFloat(y)+3).toFixed(1)+'" text-anchor="end" fill="#8888a8" font-size="8" font-family="monospace">’+val+’</text>’;}
-const wrap=document.createElement(‘div’);wrap.className=‘chart-wrap’;
-wrap.innerHTML=’<div class="chart-title">’+esc(name)+’ – reps par séance</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block;">’+yAxis+bars+’<path d="'+line+'" fill="none" stroke="#e07a7a" stroke-width="2"/>’+dots+labels+’</svg><div class="chart-legend"><div class="legend-item"><div class="legend-dot" style="background:rgba(168,216,168,0.6);"></div>total reps</div><div class="legend-item"><div class="legend-dot" style="background:#e07a7a;border-radius:50%;"></div>max serie</div></div>’;
-area.appendChild(wrap);
-}
-
-function forceUpdate(){
-const reload=()=>{location.href=location.href.split(’?’)[0]+’?v=’+Date.now();};
-if(‘serviceWorker’ in navigator){
-navigator.serviceWorker.getRegistrations().then(regs=>{
-Promise.all(regs.map(r=>r.unregister())).then(()=>{
-caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(reload).catch(reload);
-}).catch(reload);
-}).catch(reload);
-} else {
-reload();
-}
-}
-
-loadLocal();
-render();
-document.addEventListener(‘click’,function(e){var ar=document.querySelector(’.add-exo’);if(ar&&!ar.contains(e.target))hideDD();});
-document.addEventListener(‘touchstart’,function(e){var ar=document.querySelector(’.add-exo’);if(ar&&!ar.contains(e.target))hideDD();},{passive:true});
-if(‘serviceWorker’ in navigator)navigator.serviceWorker.register(‘sw.js’).catch(()=>{});
+window.emailjs = { init:function(){}, send:function(){ return Promise.reject({text:'EmailJS non configuré'}); } };
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" onerror="console.warn('EmailJS CDN indisponible')"></script>
+<script>
+const owner = 'napolsg';
+const repo  = 'tdb';
 
+const PROFILES = {
+  napo: {
+    name: 'Napo',
+    email: 'l.lassus87@gmail.com',
+    contacts: [{ name: 'Bitchoun', repo: 'tdb', email: 'mariealix.delassus@gmail.com', both: true }]
+  },
+  bitchoun: {
+    name: 'Bitchoun',
+    email: 'mariealix.delassus@gmail.com',
+    contacts: [{ name: 'Napo', repo: 'tdb', email: 'l.lassus87@gmail.com', both: true }]
+  }
+};
+
+let config    = JSON.parse(localStorage.getItem('tdb_config')    || '{}');
+let tasks     = JSON.parse(localStorage.getItem('tdb_tasks')     || '[]');
+let log       = JSON.parse(localStorage.getItem('tdb_log')       || '[]');
+let deleted   = new Set(JSON.parse(localStorage.getItem('tdb_deleted') || '[]'));
+let currentProfile = localStorage.getItem('tdb_profile') || null;
+let contacts  = JSON.parse(localStorage.getItem('tdb_contacts') || 'null') || 
+  (currentProfile && PROFILES[currentProfile] ? PROFILES[currentProfile].contacts : []);
+let filter    = 'all';
+let editingId = null;
+
+async function init() {
+  if (config.to && document.getElementById('ejs-to'))       document.getElementById('ejs-to').value       = config.to;
+  if (config.ghToken   && document.getElementById('gh-token'))   document.getElementById('gh-token').value   = config.ghToken;
+  if (config.ownerName && document.getElementById('owner-name')) document.getElementById('owner-name').value = config.ownerName;
+
+  // Initialise les labels des filtres avec le contact par défaut
+  const defCt = contacts[0];
+  if (defCt) {
+    const bothBtn    = document.getElementById('filter-both-btn');
+    const contactBtn = document.getElementById('filter-contact-btn');
+    if (bothBtn)    bothBtn.textContent    = defCt.name + ' et moi';
+    if (contactBtn) contactBtn.textContent = defCt.name;
+  }
+
+  // Affiche le sélecteur de profil si pas encore choisi
+  if (!currentProfile) {
+    showProfileSelector();
+  } else {
+    updateProfileDisplay();
+  }
+
+  // Affiche la liste immédiatement
+  render();
+
+  // Sync depuis GitHub au chargement
+  const ind = document.getElementById('sync-indicator');
+  if (ind) ind.style.display = 'block';
+  await syncFromGitHub(true);
+  if (ind) ind.style.display = 'none';
+
+  // Pas de tâches par défaut
+
+  setInterval(tickClock, 1000);
+  setInterval(() => syncFromGitHub(false), 120000);
+  tickClock();
+}
+
+async function syncFromGitHub(notify = false) {
+  if (!config.ghToken) return;
+  try {
+    const url = 'https://api.github.com/repos/napolsg/tdb/contents/tasks.json';
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const binary = atob(data.content.replace(/\s/g, ''));
+    const bytes  = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+
+    const remote        = Array.isArray(parsed) ? parsed : (parsed.tasks || []);
+    const remoteDeleted = Array.isArray(parsed) ? [] : (parsed.deletedIds || []);
+
+    // Fusionne les suppressions
+    remoteDeleted.forEach(id => deleted.add(String(id)));
+    localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
+
+    // GitHub est la source de vérité
+    const remoteIds = new Set(remote.map(t => String(t.id)));
+    const localOnly = tasks.filter(t => !remoteIds.has(String(t.id)) && !deleted.has(String(t.id)));
+
+    // Tâches remote filtrées des supprimées et filtrées par profil
+    const profile = PROFILES[currentProfile];
+    const myName = profile ? profile.name : null;
+    const validRemote = remote.filter(t => {
+      if (deleted.has(String(t.id))) return false;
+      if (!myName) return true;
+      // Mes tâches (créées par moi)
+      if (t.owner === myName) return true;
+      // Tâches sans owner (ancien format)
+      if (!t.owner) return true;
+      // Tâches d'un autre profil : visibles seulement si assignées à moi
+      // __both_X__ = assignée aux deux → visible par tous
+      // __contact_X__ = assignée à un contact spécifique → visible seulement par ce contact
+      // On identifie "moi" comme contact de l'autre profil par son email ou son nom
+      if (t.owner !== myName && t.assigneeRef) {
+        if (t.assigneeRef.startsWith('__both_')) return true; // assignée aux deux
+        if (t.assigneeRef.startsWith('__contact_')) {
+          // Vérifie que ce contact correspond à mon profil
+          const profile = PROFILES[currentProfile];
+          if (!profile) return false;
+          // L'autre profil m'a assigné cette tâche si son contact[idx] = moi
+          const idx = parseInt(t.assigneeRef.replace('__contact_', '').replace('__', ''));
+          const otherProfileKey = Object.keys(PROFILES).find(k => k !== currentProfile);
+          const otherProfile = PROFILES[otherProfileKey];
+          if (!otherProfile) return false;
+          const ct = otherProfile.contacts[idx];
+          return ct && (ct.email === profile.email || ct.name === profile.name);
+        }
+      }
+      return false;
+    });
+
+    const merged = [...validRemote, ...localOnly];
+    const prev   = JSON.stringify(tasks);
+    tasks = merged;
+    localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
+
+    if (JSON.stringify(tasks) !== prev) {
+      render();
+      if (notify) toast('Tâches synchronisées', 'ok');
+    }
+  } catch(e) {
+    console.warn('Sync depuis GitHub échoué:', e.message);
+  }
+}
+
+function tickClock() {
+  const n = new Date();
+  const h = n.getHours().toString().padStart(2,'0');
+  const m = n.getMinutes().toString().padStart(2,'0');
+  const active = tasks.filter(t => !t.done).length;
+  const _sub = document.getElementById('subtitle'); if(_sub) _sub.textContent =
+    `${h}:${m}  ·  ${active} tâche${active !== 1 ? 's' : ''} en cours`;
+}
+
+
+
+function showProfileSelector() {
+  const el = document.getElementById('profile-overlay');
+  if (el) el.style.display = 'flex';
+}
+
+async function selectProfile(profileKey) {
+  const profile = PROFILES[profileKey];
+  if (!profile) return;
+  
+  currentProfile = profileKey;
+  localStorage.setItem('tdb_profile', profileKey);
+  
+  // Set owner name
+  config.ownerName = profile.name;
+  localStorage.setItem('tdb_config', JSON.stringify(config));
+  
+  // Set contacts from profile if not already set
+  if (!localStorage.getItem('tdb_contacts')) {
+    contacts = profile.contacts;
+    localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  }
+  
+  // Vide les tâches locales pour recharger depuis GitHub
+  tasks = [];
+  deleted = new Set();
+  localStorage.removeItem('tdb_tasks');
+  localStorage.removeItem('tdb_deleted');
+
+  // Hide selector
+  const el = document.getElementById('profile-overlay');
+  if (el) el.style.display = 'none';
+  
+  // Update UI et resync depuis GitHub
+  updateProfileDisplay();
+  populateAssigneeSelects();
+  await syncFromGitHub(true);
+  render();
+  
+  toast('Bonjour ' + profile.name + ' !', 'ok');
+}
+
+function updateProfileDisplay() {
+  if (!currentProfile) return;
+  const profile = PROFILES[currentProfile];
+  if (!profile) return;
+  // Utilise les contacts du profil actuel
+  const ct = profile.contacts[0];
+  const bothBtn    = document.getElementById('filter-both-btn');
+  const contactBtn = document.getElementById('filter-contact-btn');
+  if (bothBtn)    bothBtn.textContent    = ct ? ct.name + ' et moi' : '';
+  if (contactBtn) contactBtn.textContent = ct ? ct.name : '';
+  // Met aussi à jour les contacts locaux
+  contacts = [...profile.contacts];
+  localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  populateAssigneeSelects();
+}
+
+function sanitize(str) {
+  // Garde uniquement les caractères ASCII valides pour les headers HTTP
+  return (str || '').replace(/[^ -~]/g, '').trim();
+}
+
+function saveOwnerName() {
+  config.ownerName = (document.getElementById('owner-name')?.value || '').trim();
+  localStorage.setItem('tdb_config', JSON.stringify(config));
+  saveConfigToGitHub();
+  toast('Nom sauvegardé', 'ok');
+}
+
+function saveConfig() {
+  config = {
+    ...config,
+    ghToken: sanitize(document.getElementById('gh-token') ? document.getElementById('gh-token').value : (config.ghToken || '')),
+  };
+  localStorage.setItem('tdb_config', JSON.stringify(config));
+  toast('Configuration sauvegardée', 'ok');
+  updateTokenUI();
+}
+
+function updateTokenUI() {
+  const box  = document.getElementById('token-box');
+  const btn  = document.getElementById('save-btn');
+  if (!box || !btn) return;
+  if (config.ghToken) {
+    box.style.display = 'none';
+    btn.textContent = 'Changer le token';
+    btn.onclick = showTokenInput;
+  } else {
+    box.style.display = 'block';
+    btn.textContent = 'Sauvegarder';
+    btn.onclick = saveConfig;
+  }
+}
+
+function showTokenInput() {
+  const box = document.getElementById('token-box');
+  const btn = document.getElementById('save-btn');
+  if (!box || !btn) return;
+  box.style.display = 'block';
+  document.getElementById('gh-token').value = '';
+  btn.textContent = 'Sauvegarder';
+  btn.onclick = saveConfig;
+}
+
+
+
+function addLog(e) {
+  log.unshift(e); if (log.length > 20) log.pop();
+  localStorage.setItem('tdb_log', JSON.stringify(log));
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('log-wrap');
+  if (!el) return;
+  if (!log.length) { el.innerHTML = '<div class="log-r">Aucun envoi</div>'; return; }
+  el.innerHTML = log.map(e =>
+    e.status==='sent'  ? `<div class="log-r sent">✓ ${e.time} · ${e.count} tâches</div>` :
+    e.status==='sim'   ? `<div class="log-r sim">○ ${e.time} · simulation</div>` :
+                         `<div class="log-r err">✕ ${e.time} · ${e.msg}</div>`
+  ).join('');
+}
+
+
+
+function addTask() {
+  const title = document.getElementById('new-title').value.trim();
+  if (!title) return;
+  const profile = PROFILES[currentProfile];
+  const assigneeVal = document.getElementById('new-assignee').value || '__me__';
+  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(assigneeVal), assigneeRef: assigneeVal, done:false, created:new Date().toISOString(), owner: profile ? profile.name : '' });
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-project').value = '';
+  document.getElementById('new-assignee').value = '__me__';
+  save(); renderTasks(); updateStats(); tickClock();
+  const newTask = tasks[0];
+  // La notification est gérée par notify.yml via le push sur tasks.json (GitHub Actions)
+  // notify.yml a un verrou par tâche pour éviter les doublons
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id===id);
+  if (t) {
+    t.done = !t.done;
+    save(); renderTasks(); updateStats(); tickClock();
+    if (t.assignedBy) {
+      // Sync le statut done vers le dépôt de l'assigneur
+      syncTaskStatusToAssigner(t);
+    }
+    if (t.done && t.assignedBy) {
+      scheduleSyncToGitHub().then(() => triggerCompletionNotification(t));
+    }
+
+  }
+}
+
+async function syncTaskStatusToAssigner(task) {
+  if (!config.ghToken || !task.assignedBy) return;
+  const targetRepo = task.assignedBy;
+  try {
+    const url = 'https://api.github.com/repos/napolsg/' + targetRepo + '/contents/tasks.json';
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const binary = atob(data.content.replace(/\s/g, ''));
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    const remoteTasks = Array.isArray(parsed) ? parsed : (parsed.tasks || []);
+    const remoteDeleted = Array.isArray(parsed) ? [] : (parsed.deletedIds || []);
+
+    // Trouve la tâche correspondante chez l'assigneur
+    const remoteTask = remoteTasks.find(t => String(t.id) === String(task.id));
+    if (!remoteTask) return;
+
+    // Met à jour le statut done
+    remoteTask.done = task.done;
+
+    const payload = { tasks: remoteTasks, deletedIds: remoteDeleted };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + sanitize(config.ghToken),
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'TaskMail: mise a jour statut tache',
+        content,
+        sha: data.sha
+      })
+    });
+    console.log('Statut tache sync vers ' + targetRepo);
+  } catch(e) {
+    console.warn('Sync statut echoue:', e.message);
+  }
+}
+
+function openEdit(id) {
+  const t = tasks.find(t => t.id===id);
+  if (!t) return;
+  editingId = id;
+  document.getElementById('e-title').value    = t.title;
+  document.getElementById('e-priority').value = t.priority;
+  document.getElementById('e-project').value  = t.project || '';
+  populateAssigneeSelects();
+  const eAssign = document.getElementById('e-assignee');
+  if (eAssign) {
+    eAssign.value = t.assigneeRef || t.assignee || '';
+  }
+  const form = document.getElementById('inline-contact-form');
+  if (form) form.style.display = 'none';
+  document.getElementById('e-overlay').classList.add('open');
+  document.getElementById('e-sheet').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('e-overlay').classList.remove('open');
+  document.getElementById('e-sheet').classList.remove('open');
+  editingId = null;
+}
+
+function saveEdit() {
+  const t = tasks.find(t => t.id===editingId);
+  if (!t) return;
+  t.title    = document.getElementById('e-title').value.trim() || t.title;
+  t.priority = document.getElementById('e-priority').value;
+  t.project  = document.getElementById('e-project').value.trim();
+  t.assignee    = getAssigneeEmail(document.getElementById('e-assignee')?.value || '');
+  t.assigneeRef = document.getElementById('e-assignee')?.value || '';
+  const prevAssignee = (tasks.find(t => t.id === editingId) || {}).assigneeRef || '';
+  save(); renderTasks(); updateStats(); closeEdit();
+  toast('Tâche mise à jour', 'ok');
+  const updatedTask = tasks.find(t => t.id === editingId);
+
+}
+
+function deleteEdit() {
+  const id = editingId;
+  deleted.add(String(id));
+  localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
+  tasks = tasks.filter(t => t.id !== id);
+  closeEdit();
+  save(); renderTasks(); updateStats(); tickClock();
+  toast('Tâche supprimée', 'info');
+}
+
+let githubLock = false;
+let pendingSync = false;
+
+function save() {
+  localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
+  scheduleSyncToGitHub();
+}
+
+function scheduleSyncToGitHub() {
+  if (githubLock) { pendingSync = true; return Promise.resolve(); }
+  githubLock = true;
+  return syncToGitHub().finally(async () => {
+    githubLock = false;
+    if (pendingSync) { pendingSync = false; scheduleSyncToGitHub(); }
+  });
+}
+
+
+async function syncToGitHub() {
+  if (!config.ghToken) return;
+  const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/tasks.json';
+  try {
+    const getRes = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    if (!getRes.ok) return;
+    const getData = await getRes.json();
+
+    // Lit les tâches existantes sur GitHub
+    const binary = atob(getData.content.replace(/\s/g, ''));
+    const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+    const parsed = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    const remoteTasks = Array.isArray(parsed) ? parsed : (parsed.tasks || []);
+    const remoteDeletedIds = Array.isArray(parsed) ? [] : (parsed.deletedIds || []);
+
+    // Fusionne : garde les tâches des autres profils + mes tâches mises à jour
+    const profile = PROFILES[currentProfile];
+    const myName = profile ? profile.name : null;
+    const otherTasks = remoteTasks.filter(t => myName && t.owner && t.owner !== myName);
+    const allDeleted = [...new Set([...deleted, ...remoteDeletedIds])];
+    const merged = [...tasks, ...otherTasks.filter(t => !deleted.has(String(t.id)))];
+
+    const payload = { tasks: merged, deletedIds: allDeleted };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'TDB: mise a jour des taches', content, sha: getData.sha })
+    });
+    if (putRes.status === 409) {
+      console.warn('Conflit 409 sur syncToGitHub - sera retenté');
+      return;
+    }
+    console.log('Taches synchronisees sur GitHub');
+  } catch(e) {
+    console.warn('Sync GitHub échoué:', e.message);
+  }
+}
+
+function setFilter(f, el) {
+  filter = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
+const priorityOrder = { high: 0, medium: 1, low: 2 };
+function sortByPriority(list) {
+  return [...list].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+}
+function getFiltered() {
+  let list;
+  if (filter === 'me')
+    // Mes tâches = sans assigné, assigné à moi, reçues d'un autre, OU assignées aux deux
+    list = tasks.filter(t => !t.assigneeRef || t.assigneeRef === '' || t.assigneeRef === '__me__'
+      || t.assignedBy
+      || (t.assigneeRef && t.assigneeRef.startsWith('__both_')));
+  else if (filter === 'contact')
+    // Tâches du contact = assignées à lui seul OU aux deux
+    list = tasks.filter(t => t.assigneeRef && (
+      t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')
+    ));
+  else if (filter === 'both')
+    // Tâches communes = assignées aux deux
+    list = tasks.filter(t => t.assigneeRef && t.assigneeRef.startsWith('__both_'));
+  else
+    list = [...tasks];
+  return sortByPriority(list);
+}
+
+function renderTasks() {
+  const el   = document.getElementById('task-list');
+  const list = getFiltered();
+  const ct0 = contacts[0];
+  const contactName = ct0 ? ct0.name : 'Contact';
+  const labels = { all:'Toutes les tâches', me:'Mes tâches', contact: contactName, both: contactName + ' et moi' };
+  const _sh = document.getElementById('section-head'); if(_sh) _sh.textContent = labels[filter] || 'Tâches';
+
+  const doneBar = document.getElementById('done-bar');
+  if (doneBar) doneBar.style.display = tasks.some(t => t.done) ? 'block' : 'none';
+
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">Aucune tâche</div><div class="empty-sub">Ajoutez-en une ci-dessous</div></div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="task-group">${list.map(t => `
+    <div class="task-row ${t.done?'done':''}">
+      <div class="cb ${t.done?'checked':''}" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+      <div class="priority-dot pd-${t.priority}"></div>
+      <div class="task-body" onclick="openEdit(${t.id})">
+        <div class="task-title">${esc(t.title)}</div>
+        ${t.project ? `<div class="task-project">${esc(t.project)}</div>` : ''}
+
+        ${(t.owner === (PROFILES[currentProfile]?.name) && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') ? '<div class="task-project" style="color:#2D5BE3;">Assigné à : ' + esc(getAssigneeLabel(t)) + '</div>' : ''}
+        ${t.assignedBy ? '<div class="task-project" style="color:#2eb88a;">Assigné par : ' + esc(getAssignedByLabel(t)) + '</div>' : ''}
+      </div>
+      <button class="edit-btn" onclick="openEdit(${t.id})">✎</button>
+    </div>
+  `).join('')}</div>`;
+}
+
+function updateStats() {
+  const _st = document.getElementById('s-total'); if(_st) _st.textContent = tasks.length;
+  const _sd = document.getElementById('s-done'); if(_sd) _sd.textContent = tasks.filter(t => t.done).length;
+  const _sh2 = document.getElementById('s-high'); if(_sh2) _sh2.textContent = tasks.filter(t => t.priority==='high' && !t.done).length;
+}
+
+
+// -- SCHEDULES CONFIG ----------------------
+
+
+
+// ── CONTACTS ──────────────────────────────
+async function saveConfigToGitHub() {
+  if (!config.ghToken) return;
+  try {
+    const url = 'https://api.github.com/repos/napolsg/tdb/contents/config.json';
+    const getRes = await fetch(url, {
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+    const getData = await getRes.json();
+    const configData = { contacts, ownerName: config.ownerName || '' };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(configData, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'TaskMail: mise a jour config', content, sha: getData.sha })
+    });
+    console.log('Config sauvegardée sur GitHub');
+  } catch(e) {
+    console.warn('Sauvegarde config GitHub échouée:', e.message);
+  }
+}
+
+function saveContacts() {
+  localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  saveConfigToGitHub();
+}
+
+function renderContactsList() {
+  const el = document.getElementById('contacts-list');
+  if (!el) return;
+  if (!contacts.length) {
+    el.innerHTML = '<div style="padding:12px 14px; font-size:0.8rem; color:#8E8E93;">Aucun contact</div>';
+    return;
+  }
+  el.innerHTML = contacts.map((ct, i) => `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:0.5px solid #F2F2F7;">
+      <div>
+        <div style="font-size:0.88rem; font-weight:600; color:#1C1C1E;">${esc(ct.name)}</div>
+        <div style="font-size:0.72rem; color:#8E8E93;">${ct.repo ? 'Dépôt: ' + ct.repo : ''}${ct.repo && ct.email ? '<br>' : ''}${ct.email ? 'Email: ' + ct.email : ''}</div>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <button onclick="editContact(${i})" style="background:#F2F2F7; border:none; border-radius:7px; padding:5px 10px; font-size:0.75rem; color:#3C3C43; cursor:pointer;">✎</button>
+        <button onclick="deleteContact(${i})" style="background:#FDF0EE; border:none; border-radius:7px; padding:5px 10px; font-size:0.75rem; color:#C0392B; cursor:pointer;">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddContact() {
+  document.getElementById('contact-form-title').textContent = 'Nouveau contact';
+  document.getElementById('editing-contact-idx').value = '-1';
+  document.getElementById('cf-name').value = '';
+  document.getElementById('cf-repo').value = '';
+  document.getElementById('cf-email').value = '';
+  document.getElementById('contact-edit-form').style.display = 'block';
+}
+
+function editContact(i) {
+  const ct = contacts[i];
+  if (!ct) return;
+  document.getElementById('contact-form-title').textContent = 'Modifier le contact';
+  document.getElementById('editing-contact-idx').value = i;
+  document.getElementById('cf-name').value = ct.name || '';
+  document.getElementById('cf-email').value = ct.email || '';
+  document.getElementById('cf-repo').value = ct.repo || '';
+  document.getElementById('contact-edit-form').style.display = 'block';
+}
+
+function deleteContact(i) {
+  contacts.splice(i, 1);
+  saveContacts();
+  renderContactsList();
+  populateAssigneeSelects();
+  toast('Contact supprimé', 'info');
+}
+
+function saveContactForm() {
+  const name  = (document.getElementById('cf-name')?.value || '').trim();
+  const type  = document.getElementById('cf-type')?.value;
+  const repo  = (document.getElementById('cf-repo')?.value || '').trim();
+  const email = (document.getElementById('cf-email')?.value || '').trim();
+  if (!name) { toast('Nom requis', 'err'); return; }
+  if (!repo && !email) { toast('Dépôt ou email requis', 'err'); return; }
+  const ct = { name, email, repo: (document.getElementById('cf-repo')?.value || '').trim(), both: !!(email && (document.getElementById('cf-repo')?.value || '').trim()) };
+  const idx = parseInt(document.getElementById('editing-contact-idx').value);
+  if (idx >= 0) {
+    contacts[idx] = ct;
+  } else {
+    contacts.push(ct);
+  }
+  saveContacts();
+  renderContactsList();
+  populateAssigneeSelects();
+  cancelContactForm();
+  toast((idx >= 0 ? 'Contact modifié' : 'Contact ajouté'), 'ok');
+}
+
+function cancelContactForm() {
+  document.getElementById('contact-edit-form').style.display = 'none';
+}
+
+function populateAssigneeSelects() {
+  let opts = '<option value="__me__">Moi</option>';
+  contacts.forEach(function(ct, i) {
+    opts += '<option value="__contact_' + i + '__">' + ct.name + '</option>';
+    if (ct.repo) {
+      opts += '<option value="__both_' + i + '__">' + ct.name + ' et moi</option>';
+    }
+  });
+  ['new-assignee', 'e-assignee'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+  // Update filter button labels
+  if (contacts.length > 0) {
+    const ct = contacts[0];
+    const bothBtn = document.getElementById('filter-both-btn');
+    const contactBtn = document.getElementById('filter-contact-btn');
+    if (bothBtn) { bothBtn.textContent = ct.name + ' et moi'; bothBtn.style.display = ''; }
+    if (contactBtn) { contactBtn.textContent = ct.name; contactBtn.style.display = ''; }
+  }
+}
+
+
+function onAssigneeChange(sel) {
+  if (!sel) return;
+  const editForm = document.getElementById('inline-contact-form');
+  const addForm  = document.getElementById('add-bar-contact-form');
+
+  if (sel.value === '__new__') {
+    if (sel.id === 'new-assignee' && addForm) {
+      addForm.style.display = 'block';
+      addForm.dataset.triggeredBy = sel.id;
+      if (editForm) editForm.style.display = 'none';
+    } else if (editForm) {
+      editForm.style.display = 'block';
+      editForm.dataset.triggeredBy = sel.id;
+      if (addForm) addForm.style.display = 'none';
+    }
+  } else {
+    if (editForm) editForm.style.display = 'none';
+    if (addForm)  addForm.style.display  = 'none';
+  }
+}
+
+
+function getAssigneeEmail(val) {
+  if (!val || val === '--' || val === '' ) return '';
+  if (val === '__me__') return '';
+  if (val === '__new__') return '';
+  if (val.startsWith('__contact_')) {
+    const idx = parseInt(val.replace('__contact_', '').replace('__', ''));
+    const ct = contacts[idx];
+    if (!ct) return '';
+    return ct.email || ct.repo || '';
+  }
+  return val;
+}
+
+function getAssignedByLabel(t) {
+  if (!t.assignedBy) return '';
+  const ct = contacts.find(c => c.repo === t.assignedBy || c.name === t.assignedBy);
+  return ct ? ct.name : t.assignedBy;
+}
+
+function getAssigneeLabel(t) {
+  if (!t.assigneeRef) return '';
+  if (t.assigneeRef === '__me__') return 'Moi';
+  if (t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')) {
+    const ct = getContactByValue(t.assigneeRef);
+    if (!ct) return '';
+    return t.assigneeRef.startsWith('__both_') ? ct.name + ' et moi' : ct.name;
+  }
+  return '';
+}
+
+function getContactByValue(val) {
+  if (!val) return null;
+  if (val.startsWith('__contact_') || val.startsWith('__both_')) {
+    const idx = parseInt(val.replace('__contact_', '').replace('__both_', '').replace('__', ''));
+    return contacts[idx] || null;
+  }
+  return null;
+}
+
+function clearDone() {
+  const doneIds = tasks.filter(t => t.done).map(t => String(t.id));
+  doneIds.forEach(id => deleted.add(id));
+  localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
+  tasks = tasks.filter(t => !t.done);
+  save(); renderTasks(); updateStats(); tickClock();
+  toast('Tâches faites supprimées', 'ok');
+}
+
+
+
+
+async function triggerCompletionNotification(task) {
+  // Quand une tâche reçue (assignedBy) est complétée, notifie l'assigneur
+  if (!task.assignedBy || !config.ghToken) return;
+  // Cherche l'email de l'assigneur dans les contacts
+  // Cherche par repo, nom ou ownerName
+  const ct = contacts.find(c => 
+    c.repo === task.assignedBy || 
+    c.name === task.assignedBy ||
+    (task.assignedBy && c.name.toLowerCase() === task.assignedBy.toLowerCase()) ||
+    (task.assignedBy && c.repo && c.repo.toLowerCase() === task.assignedBy.toLowerCase())
+  );
+  if (!ct || !ct.email) {
+    console.warn('Contact assigneur non trouvé pour:', task.assignedBy, 'contacts:', contacts.map(c => c.name + '/' + c.repo));
+    return;
+  }
+
+  try {
+    await fetch('https://api.github.com/repos/napolsg/' + repo + '/actions/workflows/notify.yml/dispatches', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'token ' + sanitize(config.ghToken),
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ref: 'main',
+        inputs: { task_id: String(task.id), to_email: ct.email, notif_type: 'completed' }
+      })
+    });
+    console.log('Notification complétion envoyée à ' + ct.email);
+  } catch(e) {
+    console.warn('Notification complétion échouée:', e.message);
+  }
+}
+
+function render() { renderTasks(); updateStats(); renderLog(); populateAssigneeSelects(); }
+
+function openSettings() {
+  document.getElementById('s-overlay').classList.add('open');
+  document.getElementById('s-sheet').classList.add('open');
+  updateTokenUI();
+  populateAssigneeSelects();
+  renderContactsList();
+}
+function closeSettings() {
+  document.getElementById('s-overlay').classList.remove('open');
+  document.getElementById('s-sheet').classList.remove('open');
+}
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else { init(); }
+</script>
 </body>
 </html>
