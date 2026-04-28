@@ -19,6 +19,13 @@ on:
         required: true
         default: 'assigned'
 
+# Un seul job notify actif à la fois par type d'événement.
+# Pour les push : annule le job en attente si un nouveau push arrive (cancel-in-progress).
+# Pour les workflow_dispatch : pas d'annulation (notifications manuelles indépendantes).
+concurrency:
+  group: notify-${{ github.event_name }}-${{ github.event_name == 'push' && 'push' || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
+
 jobs:
   notify:
     runs-on: ubuntu-latest
