@@ -40,7 +40,7 @@
       "project": "",
       "assignee": "__both_0__",
       "assigneeRef": "__both_0__",
-      "done": false,
+      "done": true,
       "created": "2026-04-22T10:52:50.315Z",
       "owner": "Napo"
     },
@@ -296,6 +296,28 @@
       "done": false,
       "created": "2026-04-22T10:52:50.315Z",
       "owner": "Napo"
+    },
+    {
+      "id": 1777292135043,
+      "title": "Canapé : aller en acheter pr livraison avant le 13 juin",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-27T12:15:35.043Z",
+      "owner": "Bitchoun"
+    },
+    {
+      "id": 1777292135043,
+      "title": "Canapé : aller en acheter pr livraison avant le 13 juin",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-27T12:15:35.043Z",
+      "owner": "Bitchoun"
     },
     {
       "id": 1777292135043,
