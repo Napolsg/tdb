@@ -7,39 +7,6 @@
       "project": "",
       "assignee": "__both_0__",
       "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-04-22T11:40:51.064Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1776855211647,
-      "title": "Anniversaire Côme",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-04-22T10:53:31.647Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1776855178027,
-      "title": "Cadeau Tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-04-22T10:52:58.027Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1776858051064,
-      "title": "Anniversaire Tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
       "done": false,
       "created": "2026-04-22T11:40:51.064Z",
       "owner": "Napo"
@@ -2993,17 +2960,6 @@
       "owner": "Napo"
     },
     {
-      "id": 1776855178027,
-      "title": "Cadeau Tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-04-22T10:52:58.027Z",
-      "owner": "Napo"
-    },
-    {
       "id": 1776858051064,
       "title": "Anniversaire Tristan",
       "priority": "medium",
@@ -5960,17 +5916,6 @@
       "assigneeRef": "__both_0__",
       "done": false,
       "created": "2026-04-22T10:53:31.647Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1776855178027,
-      "title": "Cadeau Tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-04-22T10:52:58.027Z",
       "owner": "Napo"
     },
     {
@@ -11900,17 +11845,6 @@
       "assigneeRef": "__both_0__",
       "done": false,
       "created": "2026-04-22T10:53:31.647Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1776855178027,
-      "title": "Cadeau Tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-04-22T10:52:58.027Z",
       "owner": "Napo"
     },
     {
@@ -17961,6 +17895,9 @@
     "1777303089212",
     "1777382729791",
     "1776855170315",
-    "1777365801881"
+    "1777365801881",
+    "1776858051064",
+    "1776855211647",
+    "1776855178027"
   ]
 }
