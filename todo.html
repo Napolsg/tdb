@@ -549,7 +549,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.8</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.9</div>
 
 <div id="toasts"></div>
 
@@ -644,11 +644,17 @@ async function syncFromGitHub(notify = false) {
 
     // GitHub est la source de vérité
     const remoteIds = new Set(remote.map(t => String(t.id)));
-    const localOnly = tasks.filter(t => !remoteIds.has(String(t.id)) && !deleted.has(String(t.id)));
-
-    // Tâches remote filtrées des supprimées et filtrées par profil
     const profile = PROFILES[currentProfile];
     const myName = profile ? profile.name : null;
+    // localOnly = mes tâches créées localement pas encore sur GitHub
+    // On exclut les tâches des autres profils (elles viennent du remote, pas du local)
+    const localOnly = tasks.filter(t =>
+      !remoteIds.has(String(t.id)) &&
+      !deleted.has(String(t.id)) &&
+      (t.owner === myName || !t.owner)
+    );
+
+    // Tâches remote filtrées des supprimées et filtrées par profil
     const validRemote = remote.filter(t => {
       if (deleted.has(String(t.id))) return false;
       if (!myName) return true;
