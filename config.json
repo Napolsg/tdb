@@ -2,5 +2,11 @@
   "schedules": [
     "08:00"
   ],
-  "contacts": []
+  "contacts": [],
+  "notifiedTasks": [
+    {
+      "id": "1777382729791",
+      "date": "2026-04-28"
+    }
+  ]
 }
