@@ -51,7 +51,7 @@
       "project": "",
       "assignee": "",
       "assigneeRef": "__me__",
-      "done": false,
+      "done": true,
       "created": "2026-04-28T08:43:21.881Z",
       "owner": "Bitchoun"
     },
@@ -87,6 +87,50 @@
       "done": false,
       "created": "2026-04-27T10:06:34.631Z",
       "owner": "Bitchoun"
+    },
+    {
+      "id": 1776858051064,
+      "title": "Anniversaire Tristan",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-22T11:40:51.064Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1776855211647,
+      "title": "Anniversaire Côme",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-22T10:53:31.647Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1776855178027,
+      "title": "Cadeau Tristan",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-22T10:52:58.027Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1776855170315,
+      "title": "Cadeau Côme",
+      "priority": "medium",
+      "project": "",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
+      "done": false,
+      "created": "2026-04-22T10:52:50.315Z",
+      "owner": "Napo"
     },
     {
       "id": 1777360290689,
