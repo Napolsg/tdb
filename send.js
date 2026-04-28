@@ -6,6 +6,49 @@ const PROFILES = {
   bitchoun: { name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN, password: process.env.GMAIL_PASSWORD_BITCHOUN }
 };
 
+// Contacts par profil (miroir de todo.html)
+const PROFILES_CONTACTS = {
+  napo:     [{ name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN }],
+  bitchoun: [{ name: 'Napo',     email: process.env.GMAIL_USER_NAPO }]
+};
+
+// Renvoie true si la tâche doit apparaître dans le rappel du profil `profileKey`
+function isTaskForProfile(task, profileKey) {
+  const profile = PROFILES[profileKey];
+  if (!profile) return false;
+
+  // Toujours inclure ses propres tâches non assignées à quelqu'un d'autre uniquement
+  const isOwner = task.owner === profile.name || (!task.owner && profileKey === Object.keys(PROFILES)[0]);
+
+  const ref = task.assigneeRef || '';
+
+  // Pas d'assignation explicite → seulement le créateur
+  if (!ref || ref === '__me__') return isOwner;
+
+  // Assigné aux deux (__both_X__) → visible par le créateur ET par le contact X
+  if (ref.startsWith('__both_')) {
+    if (isOwner) return true;
+    // Est-ce que je suis le contact X du créateur ?
+    const idx = parseInt(ref.replace('__both_', '').replace('__', ''));
+    const ownerProfileKey = Object.keys(PROFILES).find(k => PROFILES[k].name === task.owner);
+    const ownerContacts = PROFILES_CONTACTS[ownerProfileKey] || [];
+    const ct = ownerContacts[idx];
+    return ct && ct.email === profile.email;
+  }
+
+  // Assigné à un contact spécifique (__contact_X__) → créateur + ce contact
+  if (ref.startsWith('__contact_')) {
+    if (isOwner) return true;
+    const idx = parseInt(ref.replace('__contact_', '').replace('__', ''));
+    const ownerProfileKey = Object.keys(PROFILES).find(k => PROFILES[k].name === task.owner);
+    const ownerContacts = PROFILES_CONTACTS[ownerProfileKey] || [];
+    const ct = ownerContacts[idx];
+    return ct && ct.email === profile.email;
+  }
+
+  return isOwner;
+}
+
 const raw      = JSON.parse(fs.readFileSync('tasks.json', 'utf8'));
 const allTasks = Array.isArray(raw) ? raw : (raw.tasks || []);
 const deletedIds = new Set(Array.isArray(raw) ? [] : (raw.deletedIds || []));
@@ -92,8 +135,7 @@ function sendMail(to, subject, html, profileKey) {
 
   for (const [profileKey, profile] of Object.entries(PROFILES)) {
     if (!profile.email || !profile.password) continue;
-    const isFirst = Object.keys(PROFILES)[0] === profileKey;
-    const profileTasks = pending.filter(t => t.owner === profile.name || (!t.owner && isFirst));
+    const profileTasks = pending.filter(t => isTaskForProfile(t, profileKey));
     if (!profileTasks.length) { console.log(`Aucune tâche pour ${profile.name}`); continue; }
     await sendMail(
       profile.email,

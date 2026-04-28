@@ -994,7 +994,10 @@ async function syncToGitHub() {
     const myName = profile ? profile.name : null;
     const otherTasks = remoteTasks.filter(t => myName && t.owner && t.owner !== myName);
     const allDeleted = [...new Set([...deleted, ...remoteDeletedIds])];
-    const merged = [...tasks, ...otherTasks.filter(t => !deleted.has(String(t.id)))];
+    // N'inclure que MES tâches depuis le local (pas celles des autres profils
+    // qui auraient été injectées dans tasks par syncFromGitHub pour l'affichage)
+    const myLocalTasks = myName ? tasks.filter(t => t.owner === myName || !t.owner) : tasks;
+    const merged = [...myLocalTasks, ...otherTasks.filter(t => !deleted.has(String(t.id)))];
 
     const payload = { tasks: merged, deletedIds: allDeleted };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
