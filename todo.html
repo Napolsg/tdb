@@ -549,7 +549,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.9</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.11</div>
 
 <div id="toasts"></div>
 
@@ -732,10 +732,9 @@ async function selectProfile(profileKey) {
   }
   
   // Vide les tâches locales pour recharger depuis GitHub
+  // On conserve deleted : GitHub les renverra de toute façon dans remoteDeletedIds
   tasks = [];
-  deleted = new Set();
   localStorage.removeItem('tdb_tasks');
-  localStorage.removeItem('tdb_deleted');
 
   // Hide selector
   const el = document.getElementById('profile-overlay');
@@ -853,10 +852,11 @@ function toggleTask(id) {
   const t = tasks.find(t => t.id===id);
   if (!t) return;
   t.done = !t.done;
-  save(); renderTasks(); updateStats(); tickClock();
-  // Notification de complétion uniquement après que le sync est terminé
+  // Un seul save() ; si complétion notifiable, on enchaîne sur sa Promise
+  const syncPromise = save();
+  renderTasks(); updateStats(); tickClock();
   if (t.done && t.assignedBy) {
-    scheduleSyncToGitHub().then(() => triggerCompletionNotification(t));
+    syncPromise.then(() => triggerCompletionNotification(t));
   }
 }
 
@@ -892,11 +892,8 @@ function saveEdit() {
   t.project  = document.getElementById('e-project').value.trim();
   t.assignee    = getAssigneeEmail(document.getElementById('e-assignee')?.value || '');
   t.assigneeRef = document.getElementById('e-assignee')?.value || '';
-  const prevAssignee = (tasks.find(t => t.id === editingId) || {}).assigneeRef || '';
   save(); renderTasks(); updateStats(); closeEdit();
   toast('Tâche mise à jour', 'ok');
-  const updatedTask = tasks.find(t => t.id === editingId);
-
 }
 
 function deleteEdit() {
@@ -914,7 +911,7 @@ let pendingSync = false;
 
 function save() {
   localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
-  scheduleSyncToGitHub();
+  return scheduleSyncToGitHub();
 }
 
 function scheduleSyncToGitHub() {
@@ -963,7 +960,8 @@ async function syncToGitHub() {
       body: JSON.stringify({ message: 'TDB: mise a jour des taches', content, sha: getData.sha })
     });
     if (putRes.status === 409) {
-      console.warn('Conflit 409 sur syncToGitHub - sera retenté');
+      console.warn('Conflit 409 sur syncToGitHub - retry planifié');
+      pendingSync = true;
       return;
     }
     console.log('Taches synchronisees sur GitHub');
@@ -1128,7 +1126,6 @@ function deleteContact(i) {
 
 function saveContactForm() {
   const name  = (document.getElementById('cf-name')?.value || '').trim();
-  const type  = document.getElementById('cf-type')?.value;
   const repo  = (document.getElementById('cf-repo')?.value || '').trim();
   const email = (document.getElementById('cf-email')?.value || '').trim();
   if (!name) { toast('Nom requis', 'err'); return; }
@@ -1219,7 +1216,11 @@ function getAssigneeLabel(t) {
   if (!t.assigneeRef) return '';
   if (t.assigneeRef === '__me__') return 'Moi';
   if (t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')) {
-    const ct = getContactByValue(t.assigneeRef);
+    // Utilise les contacts du créateur de la tâche, pas forcément ceux du profil courant
+    const ownerProfileKey = Object.keys(PROFILES).find(k => PROFILES[k].name === t.owner);
+    const ownerContacts = ownerProfileKey ? PROFILES[ownerProfileKey].contacts : contacts;
+    const idx = parseInt(t.assigneeRef.replace('__contact_', '').replace('__both_', '').replace('__', ''));
+    const ct = ownerContacts[idx];
     if (!ct) return '';
     return t.assigneeRef.startsWith('__both_') ? ct.name + ' et moi' : ct.name;
   }
@@ -1236,10 +1237,13 @@ function getContactByValue(val) {
 }
 
 function clearDone() {
-  const doneIds = tasks.filter(t => t.done).map(t => String(t.id));
+  const myName = PROFILES[currentProfile]?.name;
+  // Ne supprimer que ses propres tâches faites, pas celles de l'autre profil
+  const doneIds = tasks.filter(t => t.done && (t.owner === myName || !t.owner)).map(t => String(t.id));
+  if (!doneIds.length) return;
   doneIds.forEach(id => deleted.add(id));
   localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
-  tasks = tasks.filter(t => !t.done);
+  tasks = tasks.filter(t => !(t.done && (t.owner === myName || !t.owner)));
   save(); renderTasks(); updateStats(); tickClock();
   toast('Tâches faites supprimées', 'ok');
 }
