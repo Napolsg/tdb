@@ -12,17 +12,6 @@
       "owner": "Napo"
     },
     {
-      "id": 1777383963253,
-      "title": "Test",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": false,
-      "created": "2026-04-28T13:46:03.253Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1777292103620,
       "title": "Impôts : comment on compte mon activité EURL",
       "priority": "medium",
@@ -68,6 +57,7 @@
     "1776858051064",
     "1776855211647",
     "1776855178027",
-    "1777292135043"
+    "1777292135043",
+    "1777383963253"
   ]
 }
