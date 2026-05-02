@@ -27,8 +27,8 @@
       "title": "Anti mites",
       "priority": "medium",
       "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
+      "assignee": "__both_0__",
+      "assigneeRef": "__both_0__",
       "done": false,
       "created": "2026-05-02T10:12:00.326Z",
       "owner": "Bitchoun"
