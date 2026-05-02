@@ -10,7 +10,10 @@
 <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon-precomposed" href="icon-192.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>TO DO DU BONHEUR</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -549,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.12</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.14</div>
 
 <div id="toasts"></div>
 
@@ -623,6 +626,8 @@ async function init() {
 
 async function syncFromGitHub(notify = false) {
   if (!config.ghToken) return;
+  // Ne pas écraser les modifications locales pendant qu'une écriture est en cours
+  if (githubLock) { console.log('syncFromGitHub ignoré (écriture en cours)'); return; }
   try {
     const url = 'https://api.github.com/repos/napolsg/tdb/contents/tasks.json';
     const res = await fetch(url, {
@@ -655,6 +660,9 @@ async function syncFromGitHub(notify = false) {
     );
 
     // Tâches remote filtrées des supprimées et filtrées par profil
+    // Index des tâches locales par id pour protéger les modifications récentes
+    const localById = new Map(tasks.map(t => [String(t.id), t]));
+
     const validRemote = remote.filter(t => {
       if (deleted.has(String(t.id))) return false;
       if (!myName) return true;
@@ -684,7 +692,18 @@ async function syncFromGitHub(notify = false) {
       return false;
     });
 
-    const merged = [...validRemote, ...localOnly];
+    // Pour chaque tâche remote, si une version locale plus récente existe
+    // (modifiée dans les 10 dernières secondes), on garde le statut local
+    const now = Date.now();
+    const mergedRemote = validRemote.map(t => {
+      const local = localById.get(String(t.id));
+      if (local && local._localModified && (now - local._localModified) < 10000) {
+        return { ...t, done: local.done };
+      }
+      return t;
+    });
+
+    const merged = [...mergedRemote, ...localOnly];
     const prev   = JSON.stringify(tasks);
     tasks = merged;
     localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
@@ -852,6 +871,7 @@ function toggleTask(id) {
   const t = tasks.find(t => t.id===id);
   if (!t) return;
   t.done = !t.done;
+  t._localModified = Date.now(); // protège contre l'écrasement par syncFromGitHub
   // Un seul save() ; si complétion notifiable, on enchaîne sur sa Promise
   const syncPromise = save();
   renderTasks(); updateStats(); tickClock();
@@ -1317,7 +1337,6 @@ if (document.readyState === 'loading') {
 // Enregistrement du Service Worker (cache versionné + mise à jour automatique)
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/tdb/sw.js').then(reg => {
-    // Détecte si un nouveau SW est en attente et recharge la page
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       newWorker.addEventListener('statechange', () => {
@@ -1327,7 +1346,9 @@ if ('serviceWorker' in navigator) {
         }
       });
     });
-  }).catch(e => console.warn('SW non enregistré:', e));
+  }).catch(() => {
+    // SW non supporté sur ce navigateur (iOS Safari standalone) — ignoré
+  });
 }
 </script>
 </body>
