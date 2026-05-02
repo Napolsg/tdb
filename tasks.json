@@ -7,9 +7,10 @@
       "project": "",
       "assignee": "",
       "assigneeRef": "__me__",
-      "done": false,
+      "done": true,
       "created": "2026-05-02T19:13:42.577Z",
-      "owner": "Napo"
+      "owner": "Napo",
+      "_localModified": 1777749239681
     },
     {
       "id": 1777360290689,
