@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.24</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.25</div>
 
 <div id="toasts"></div>
 
@@ -731,6 +731,12 @@ async function syncFromGitHub(notify = false) {
     });
 
     const merged = [...mergedRemote, ...localOnly];
+    // Nettoie les _localModified expirés (> 30s) maintenant que GitHub est à jour
+    merged.forEach(t => {
+      if (t._localModified && (now - t._localModified) >= 30000) {
+        delete t._localModified;
+      }
+    });
     const prev   = JSON.stringify(tasks);
     tasks = merged;
     localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
@@ -1034,9 +1040,8 @@ async function syncToGitHub() {
       pendingSync = true;
       return;
     }
-    // Efface les marqueurs de modification locale — GitHub est maintenant à jour
-    tasks.forEach(t => { if (t._localModified) delete t._localModified; });
-    localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
+    // Ne pas effacer _localModified ici — GitHub peut mettre du temps à propager
+    // Le marqueur expire naturellement après 30s dans syncFromGitHub
     console.log('Taches synchronisees sur GitHub');
   } catch(e) {
     console.warn('Sync GitHub échoué:', e.message);
