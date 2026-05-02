@@ -28,7 +28,7 @@ html, body {
   margin: 0 auto;
 }
 
-/* -- HEADER - - */
+/* -- HEADER -- */
 .header {
   padding: 20px 20px 12px;
   background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 50%, #6BCB77 100%);
@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.14</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.16</div>
 
 <div id="toasts"></div>
 
@@ -659,12 +659,18 @@ async function syncFromGitHub(notify = false) {
       (t.owner === myName || !t.owner)
     );
 
+    // Filtre les tâches supprimées récemment (< 10s) — protège contre le retour en arrière
+    const recentlyDeleted = deletedAt ?
+      new Set([...deleted].filter(id => deletedAt.get(id) && (Date.now() - deletedAt.get(id)) < 10000)) :
+      new Set();
+
     // Tâches remote filtrées des supprimées et filtrées par profil
     // Index des tâches locales par id pour protéger les modifications récentes
     const localById = new Map(tasks.map(t => [String(t.id), t]));
 
     const validRemote = remote.filter(t => {
       if (deleted.has(String(t.id))) return false;
+      if (recentlyDeleted.has(String(t.id))) return false;
       if (!myName) return true;
       // Mes tâches (créées par moi)
       if (t.owner === myName) return true;
@@ -697,7 +703,7 @@ async function syncFromGitHub(notify = false) {
     const now = Date.now();
     const mergedRemote = validRemote.map(t => {
       const local = localById.get(String(t.id));
-      if (local && local._localModified && (now - local._localModified) < 10000) {
+      if (local && local._localModified && (now - local._localModified) < 30000) {
         return { ...t, done: local.done };
       }
       return t;
@@ -919,6 +925,7 @@ function saveEdit() {
 function deleteEdit() {
   const id = editingId;
   deleted.add(String(id));
+  deletedAt.set(String(id), Date.now());
   localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
   tasks = tasks.filter(t => t.id !== id);
   closeEdit();
@@ -928,6 +935,7 @@ function deleteEdit() {
 
 let githubLock = false;
 let pendingSync = false;
+const deletedAt = new Map(); // id → timestamp de suppression locale
 
 function save() {
   localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
@@ -984,6 +992,9 @@ async function syncToGitHub() {
       pendingSync = true;
       return;
     }
+    // Efface les marqueurs de modification locale — GitHub est maintenant à jour
+    tasks.forEach(t => { if (t._localModified) delete t._localModified; });
+    localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
     console.log('Taches synchronisees sur GitHub');
   } catch(e) {
     console.warn('Sync GitHub échoué:', e.message);
@@ -1261,7 +1272,7 @@ function clearDone() {
   // Ne supprimer que ses propres tâches faites, pas celles de l'autre profil
   const doneIds = tasks.filter(t => t.done && (t.owner === myName || !t.owner)).map(t => String(t.id));
   if (!doneIds.length) return;
-  doneIds.forEach(id => deleted.add(id));
+  doneIds.forEach(id => { deleted.add(id); deletedAt.set(id, Date.now()); });
   localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
   tasks = tasks.filter(t => !(t.done && (t.owner === myName || !t.owner)));
   save(); renderTasks(); updateStats(); tickClock();
