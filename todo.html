@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.25</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.27</div>
 
 <div id="toasts"></div>
 
@@ -627,6 +627,8 @@ async function init() {
   // Sync depuis GitHub au chargement
   const ind = document.getElementById('sync-indicator');
   if (ind) ind.style.display = 'block';
+  // Petit délai pour laisser GitHub propager après une écriture récente
+  await new Promise(r => setTimeout(r, 1500));
   await syncFromGitHub(true);
   if (ind) ind.style.display = 'none';
 
@@ -717,6 +719,7 @@ async function syncFromGitHub(notify = false) {
           return ct && (ct.email === profile.email || ct.name === profile.name);
         }
       }
+      // Tâches d'un autre profil sans assigneeRef : non visibles
       return false;
     });
 
@@ -725,7 +728,7 @@ async function syncFromGitHub(notify = false) {
     const mergedRemote = validRemote.map(t => {
       const local = localById.get(String(t.id));
       if (local && local._localModified && (now - local._localModified) < 30000) {
-        return { ...t, done: local.done };
+        return { ...t, done: local.done, _localModified: local._localModified };
       }
       return t;
     });
@@ -741,10 +744,8 @@ async function syncFromGitHub(notify = false) {
     tasks = merged;
     localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
 
-    if (JSON.stringify(tasks) !== prev) {
-      render();
-      if (notify) toast('Tâches synchronisées', 'ok');
-    }
+    render(); // toujours re-rendre pour que doneBar soit à jour
+    if (notify && JSON.stringify(tasks) !== prev) toast('Tâches synchronisées', 'ok');
   } catch(e) {
     console.warn('Sync depuis GitHub échoué:', e.message);
   }
