@@ -16,8 +16,8 @@
       "title": "Demander maman Victor trajets Tristan",
       "priority": "medium",
       "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
+      "assignee": "",
+      "assigneeRef": "__me__",
       "done": false,
       "created": "2026-05-02T10:23:01.621Z",
       "owner": "Bitchoun"
