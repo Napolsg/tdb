@@ -1,18 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1777749222576,
-      "title": "Ttdst",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-05-02T19:13:42.577Z",
-      "owner": "Napo",
-      "_localModified": 1777749239681
-    },
-    {
       "id": 1777360290689,
       "title": "Crème Côme",
       "priority": "medium",
@@ -125,6 +113,7 @@
     "1776855211647",
     "1776855178027",
     "1777292135043",
-    "1777383963253"
+    "1777383963253",
+    "1777749222576"
   ]
 }
