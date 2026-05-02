@@ -34,17 +34,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1777716720326,
-      "title": "Anti mites",
-      "priority": "medium",
-      "project": "",
-      "assignee": "__both_0__",
-      "assigneeRef": "__both_0__",
-      "done": false,
-      "created": "2026-05-02T10:12:00.326Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1777646756134,
       "title": "Perche jardin",
       "priority": "medium",
@@ -114,6 +103,7 @@
     "1776855178027",
     "1777292135043",
     "1777383963253",
-    "1777749222576"
+    "1777749222576",
+    "1777716720326"
   ]
 }
