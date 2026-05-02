@@ -434,7 +434,7 @@ html, body {
   <div class="header-top">
 <div class="app-title" style="text-transform:uppercase; letter-spacing:1px; font-size:1.4rem;">La To Do du Bonheur</div>
     <div class="header-actions">
-      <button class="hbtn" onclick="location.reload(true)" title="Rafraîchir">🔄</button>
+      <button class="hbtn" onclick="manualRefresh()" title="Rafraîchir">🔄</button>
       <button class="hbtn" onclick="showProfileSelector()" title="Changer de profil">👤</button>
       <button class="hbtn" onclick="openSettings()">⚙️</button>
     </div>
@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.16</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.24</div>
 
 <div id="toasts"></div>
 
@@ -579,7 +579,6 @@ const PROFILES = {
 
 let config    = JSON.parse(localStorage.getItem('tdb_config')    || '{}');
 let tasks     = JSON.parse(localStorage.getItem('tdb_tasks')     || '[]');
-let log       = JSON.parse(localStorage.getItem('tdb_log')       || '[]');
 let deleted   = new Set(JSON.parse(localStorage.getItem('tdb_deleted') || '[]'));
 let currentProfile = localStorage.getItem('tdb_profile') || null;
 let contacts  = JSON.parse(localStorage.getItem('tdb_contacts') || 'null') || 
@@ -587,10 +586,24 @@ let contacts  = JSON.parse(localStorage.getItem('tdb_contacts') || 'null') ||
 let filter    = 'all';
 let editingId = null;
 
+// Restaure deletedAt depuis localStorage (survit aux rechargements)
+let githubLock = false;
+let pendingSync = false;
+let syncRetryCount = 0;
+const SYNC_MAX_RETRIES = 5;
+const deletedAt = new Map(
+  JSON.parse(localStorage.getItem('tdb_deletedAt') || '[]')
+);
+// Nettoie les entrées > 5 minutes au démarrage (scope isolé)
+;(function() {
+  const now = Date.now();
+  for (const [id, ts] of deletedAt.entries()) {
+    if (now - ts > 300000) deletedAt.delete(id);
+  }
+})();
+
 async function init() {
-  if (config.to && document.getElementById('ejs-to'))       document.getElementById('ejs-to').value       = config.to;
-  if (config.ghToken   && document.getElementById('gh-token'))   document.getElementById('gh-token').value   = config.ghToken;
-  if (config.ownerName && document.getElementById('owner-name')) document.getElementById('owner-name').value = config.ownerName;
+  if (config.ghToken && document.getElementById('gh-token')) document.getElementById('gh-token').value = config.ghToken;
 
   // Initialise les labels des filtres avec le contact par défaut
   const defCt = contacts[0];
@@ -617,10 +630,16 @@ async function init() {
   await syncFromGitHub(true);
   if (ind) ind.style.display = 'none';
 
-  // Pas de tâches par défaut
-
   setInterval(tickClock, 1000);
   setInterval(() => syncFromGitHub(false), 120000);
+  // Nettoyage périodique de deletedAt (toutes les 5 minutes)
+  setInterval(() => {
+    const cutoff = Date.now() - 300000;
+    for (const [id, ts] of deletedAt.entries()) {
+      if (ts < cutoff) deletedAt.delete(id);
+    }
+    localStorage.setItem('tdb_deletedAt', JSON.stringify([...deletedAt.entries()]));
+  }, 300000);
   tickClock();
 }
 
@@ -659,10 +678,13 @@ async function syncFromGitHub(notify = false) {
       (t.owner === myName || !t.owner)
     );
 
-    // Filtre les tâches supprimées récemment (< 10s) — protège contre le retour en arrière
-    const recentlyDeleted = deletedAt ?
-      new Set([...deleted].filter(id => deletedAt.get(id) && (Date.now() - deletedAt.get(id)) < 10000)) :
-      new Set();
+    // Filtre les tâches supprimées récemment (< 30s) — protège contre le retour en arrière
+    const now = Date.now();
+    const recentlyDeleted = new Set(
+      [...deletedAt.entries()]
+        .filter(([id, ts]) => (now - ts) < 30000)
+        .map(([id]) => id)
+    );
 
     // Tâches remote filtrées des supprimées et filtrées par profil
     // Index des tâches locales par id pour protéger les modifications récentes
@@ -699,8 +721,7 @@ async function syncFromGitHub(notify = false) {
     });
 
     // Pour chaque tâche remote, si une version locale plus récente existe
-    // (modifiée dans les 10 dernières secondes), on garde le statut local
-    const now = Date.now();
+    // (modifiée dans les 30 dernières secondes), on garde le statut local
     const mergedRemote = validRemote.map(t => {
       const local = localById.get(String(t.id));
       if (local && local._localModified && (now - local._localModified) < 30000) {
@@ -732,8 +753,6 @@ function tickClock() {
     `${h}:${m}  ·  ${active} tâche${active !== 1 ? 's' : ''} en cours`;
 }
 
-
-
 function showProfileSelector() {
   const el = document.getElementById('profile-overlay');
   if (el) el.style.display = 'flex';
@@ -745,10 +764,6 @@ async function selectProfile(profileKey) {
   
   currentProfile = profileKey;
   localStorage.setItem('tdb_profile', profileKey);
-  
-  // Set owner name
-  config.ownerName = profile.name;
-  localStorage.setItem('tdb_config', JSON.stringify(config));
   
   // Set contacts from profile if not already set
   if (!localStorage.getItem('tdb_contacts')) {
@@ -768,6 +783,14 @@ async function selectProfile(profileKey) {
   // Update UI et resync depuis GitHub
   updateProfileDisplay();
   populateAssigneeSelects();
+  // Si un sync est en cours, attend qu'il se termine avant de recharger
+  if (githubLock) {
+    toast('Chargement en cours…', 'info');
+    await new Promise(resolve => {
+      const t = setTimeout(resolve, 15000);
+      const i = setInterval(() => { if (!githubLock) { clearInterval(i); clearTimeout(t); resolve(); } }, 300);
+    });
+  }
   await syncFromGitHub(true);
   render();
   
@@ -793,13 +816,6 @@ function updateProfileDisplay() {
 function sanitize(str) {
   // Garde uniquement les caractères ASCII valides pour les headers HTTP
   return (str || '').replace(/[^ -~]/g, '').trim();
-}
-
-function saveOwnerName() {
-  config.ownerName = (document.getElementById('owner-name')?.value || '').trim();
-  localStorage.setItem('tdb_config', JSON.stringify(config));
-  saveConfigToGitHub();
-  toast('Nom sauvegardé', 'ok');
 }
 
 function saveConfig() {
@@ -837,40 +853,17 @@ function showTokenInput() {
   btn.onclick = saveConfig;
 }
 
-
-
-function addLog(e) {
-  log.unshift(e); if (log.length > 20) log.pop();
-  localStorage.setItem('tdb_log', JSON.stringify(log));
-  renderLog();
-}
-
-function renderLog() {
-  const el = document.getElementById('log-wrap');
-  if (!el) return;
-  if (!log.length) { el.innerHTML = '<div class="log-r">Aucun envoi</div>'; return; }
-  el.innerHTML = log.map(e =>
-    e.status==='sent'  ? `<div class="log-r sent">✓ ${e.time} · ${e.count} tâches</div>` :
-    e.status==='sim'   ? `<div class="log-r sim">○ ${e.time} · simulation</div>` :
-                         `<div class="log-r err">✕ ${e.time} · ${e.msg}</div>`
-  ).join('');
-}
-
-
-
 function addTask() {
   const title = document.getElementById('new-title').value.trim();
   if (!title) return;
   const profile = PROFILES[currentProfile];
   const assigneeVal = document.getElementById('new-assignee').value || '__me__';
-  tasks.unshift({ id:Date.now(), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(assigneeVal), assigneeRef: assigneeVal, done:false, created:new Date().toISOString(), owner: profile ? profile.name : '' });
+  tasks.unshift({ id:Date.now() + Math.floor(Math.random() * 1000), title, priority:document.getElementById('new-priority').value, project:document.getElementById('new-project').value.trim(), assignee:getAssigneeEmail(assigneeVal), assigneeRef: assigneeVal, done:false, created:new Date().toISOString(), owner: profile ? profile.name : '' });
   document.getElementById('new-title').value = '';
   document.getElementById('new-project').value = '';
   document.getElementById('new-assignee').value = '__me__';
   save(); renderTasks(); updateStats(); tickClock();
-  const newTask = tasks[0];
   // La notification est gérée par notify.yml via le push sur tasks.json (GitHub Actions)
-  // notify.yml a un verrou par tâche pour éviter les doublons
 }
 
 function toggleTask(id) {
@@ -884,6 +877,24 @@ function toggleTask(id) {
   if (t.done && t.assignedBy) {
     syncPromise.then(() => triggerCompletionNotification(t));
   }
+}
+
+async function manualRefresh() {
+  // Attend la fin d'une écriture en cours avant de lire depuis GitHub
+  if (githubLock) {
+    toast('Sync en cours…', 'info');
+    // Attend la fin du sync en cours, avec timeout de sécurité à 15s
+    await new Promise(resolve => {
+      const timeout = setTimeout(resolve, 15000); // sécurité : résout après 15s max
+      const interval = setInterval(() => {
+        if (!githubLock) { clearInterval(interval); clearTimeout(timeout); resolve(); }
+      }, 500);
+    });
+  }
+  const ind = document.getElementById('sync-indicator');
+  if (ind) ind.style.display = 'block';
+  await syncFromGitHub(true);
+  if (ind) ind.style.display = 'none';
 }
 
 function openEdit(id) {
@@ -924,18 +935,16 @@ function saveEdit() {
 
 function deleteEdit() {
   const id = editingId;
+  if (!id) return;
   deleted.add(String(id));
   deletedAt.set(String(id), Date.now());
   localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
-  tasks = tasks.filter(t => t.id !== id);
+  localStorage.setItem('tdb_deletedAt', JSON.stringify([...deletedAt.entries()]));
+  tasks = tasks.filter(t => String(t.id) !== String(id));
   closeEdit();
   save(); renderTasks(); updateStats(); tickClock();
   toast('Tâche supprimée', 'info');
 }
-
-let githubLock = false;
-let pendingSync = false;
-const deletedAt = new Map(); // id → timestamp de suppression locale
 
 function save() {
   localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
@@ -943,14 +952,39 @@ function save() {
 }
 
 function scheduleSyncToGitHub() {
-  if (githubLock) { pendingSync = true; return Promise.resolve(); }
+  if (githubLock) {
+    pendingSync = true;
+    // Retourne une Promise qui se résout quand le sync en cours est terminé
+    // (et non immédiatement) — garantit que .then() s'exécute après l'écriture GitHub
+    return new Promise(resolve => {
+      const interval = setInterval(() => {
+        if (!githubLock) { clearInterval(interval); resolve(); }
+      }, 300);
+      setTimeout(() => { clearInterval(interval); resolve(); }, 20000); // sécurité 20s
+    });
+  }
   githubLock = true;
-  return syncToGitHub().finally(async () => {
+  return syncToGitHub().then(() => {
+    syncRetryCount = 0; // reset compteur sur succès
+  }).catch(e => {
+    console.warn('syncToGitHub erreur:', e.message);
+  }).finally(async () => {
     githubLock = false;
-    if (pendingSync) { pendingSync = false; scheduleSyncToGitHub(); }
+    if (pendingSync) {
+      pendingSync = false;
+      if (syncRetryCount < SYNC_MAX_RETRIES) {
+        syncRetryCount++;
+        const delay = Math.min(1000 * Math.pow(2, syncRetryCount - 1), 30000);
+        setTimeout(() => scheduleSyncToGitHub(), delay);
+      } else {
+        console.warn('Sync GitHub abandonné après', SYNC_MAX_RETRIES, 'tentatives');
+        syncRetryCount = 0; // reset pour permettre de réessayer plus tard
+      }
+    } else {
+      syncRetryCount = 0; // reset si pas de sync en attente — cycle propre
+    }
   });
 }
-
 
 async function syncToGitHub() {
   if (!config.ghToken) return;
@@ -978,10 +1012,13 @@ async function syncToGitHub() {
     // N'inclure que MES tâches depuis le local (pas celles des autres profils
     // qui auraient été injectées dans tasks par syncFromGitHub pour l'affichage)
     const myLocalTasks = myName ? tasks.filter(t => t.owner === myName || !t.owner) : tasks;
-    const merged = [...myLocalTasks, ...otherTasks.filter(t => !deleted.has(String(t.id)))];
+    const allDeletedSet = new Set(allDeleted.map(String));
+    const merged = [...myLocalTasks, ...otherTasks.filter(t => !allDeletedSet.has(String(t.id)))];
 
     const payload = { tasks: merged, deletedIds: allDeleted };
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const _bytes1 = new TextEncoder().encode(JSON.stringify(payload, null, 2));
+    let _bin1 = ''; _bytes1.forEach(b => _bin1 += String.fromCharCode(b));
+    const content = btoa(_bin1);
     const putRes = await fetch(url, {
       method: 'PUT',
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
@@ -989,6 +1026,11 @@ async function syncToGitHub() {
     });
     if (putRes.status === 409) {
       console.warn('Conflit 409 sur syncToGitHub - retry planifié');
+      pendingSync = true;
+      return;
+    }
+    if (!putRes.ok) {
+      console.warn('PUT GitHub échoué:', putRes.status, '- retry planifié');
       pendingSync = true;
       return;
     }
@@ -1017,16 +1059,33 @@ function sortByPriority(list) {
 }
 function getFiltered() {
   let list;
-  if (filter === 'me')
-    // Mes tâches = sans assigné, assigné à moi, reçues d'un autre, OU assignées aux deux
-    list = tasks.filter(t => !t.assigneeRef || t.assigneeRef === '' || t.assigneeRef === '__me__'
-      || t.assignedBy
-      || (t.assigneeRef && t.assigneeRef.startsWith('__both_')));
-  else if (filter === 'contact')
-    // Tâches du contact = assignées à lui seul OU aux deux
-    list = tasks.filter(t => t.assigneeRef && (
-      t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')
-    ));
+  if (filter === 'me') {
+    const myName = PROFILES[currentProfile]?.name;
+    list = tasks.filter(t => {
+      // Mes propres tâches (non assignées à quelqu'un d'autre uniquement)
+      if (t.owner === myName || !t.owner) {
+        if (!t.assigneeRef || t.assigneeRef === '' || t.assigneeRef === '__me__') return true;
+        if (t.assigneeRef.startsWith('__both_')) return true;
+        if (t.assigneeRef.startsWith('__contact_')) return false; // assignée à un contact uniquement
+      }
+      // Tâches reçues d'un autre profil et assignées à moi
+      if (t.owner && t.owner !== myName) {
+        if (t.assigneeRef && t.assigneeRef.startsWith('__both_')) return true;
+        if (t.assigneeRef && t.assigneeRef.startsWith('__contact_')) return true; // assignée à moi par l'autre
+      }
+      return false;
+    });
+  }
+  else if (filter === 'contact') {
+    // Tâches du contact = mes tâches assignées à lui seul OU aux deux
+    const myName = PROFILES[currentProfile]?.name;
+    list = tasks.filter(t =>
+      (t.owner === myName || !t.owner) &&
+      t.assigneeRef && (
+        t.assigneeRef.startsWith('__contact_') || t.assigneeRef.startsWith('__both_')
+      )
+    );
+  }
   else if (filter === 'both')
     // Tâches communes = assignées aux deux
     list = tasks.filter(t => t.assigneeRef && t.assigneeRef.startsWith('__both_'));
@@ -1044,7 +1103,14 @@ function renderTasks() {
   const _sh = document.getElementById('section-head'); if(_sh) _sh.textContent = labels[filter] || 'Tâches';
 
   const doneBar = document.getElementById('done-bar');
-  if (doneBar) doneBar.style.display = tasks.some(t => t.done) ? 'block' : 'none';
+  if (doneBar) {
+    const myName = PROFILES[currentProfile]?.name;
+    const hasDone = tasks.some(t => t.done && (
+      !t.owner || t.owner === myName ||
+      (t.assigneeRef && t.assigneeRef.startsWith('__both_'))
+    ));
+    doneBar.style.display = hasDone ? 'block' : 'none';
+  }
 
   if (!list.length) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">Aucune tâche</div><div class="empty-sub">Ajoutez-en une ci-dessous</div></div>`;
@@ -1073,12 +1139,7 @@ function updateStats() {
   const _sh2 = document.getElementById('s-high'); if(_sh2) _sh2.textContent = tasks.filter(t => t.priority==='high' && !t.done).length;
 }
 
-
-// -- SCHEDULES CONFIG ----------------------
-
-
-
-// ── CONTACTS ──────────────────────────────
+// ── CONTACTS / CONFIG ──────────────────────────────
 async function saveConfigToGitHub() {
   if (!config.ghToken) return;
   try {
@@ -1087,9 +1148,22 @@ async function saveConfigToGitHub() {
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json' },
       cache: 'no-cache'
     });
+    if (!getRes.ok) { console.warn('saveConfigToGitHub: GET échoué', getRes.status); return; }
     const getData = await getRes.json();
-    const configData = { contacts, ownerName: config.ownerName || '' };
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(configData, null, 2))));
+    // Lit d'abord la config remote pour préserver schedules et notifiedTasks
+    let existingConfig = {};
+    try {
+      const binary = atob(getData.content.replace(/\s/g, ''));
+      const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+      existingConfig = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    } catch(e) {}
+    const configData = {
+      ...existingConfig,
+      contacts
+    };
+    const _bytes2 = new TextEncoder().encode(JSON.stringify(configData, null, 2));
+    let _bin2 = ''; _bytes2.forEach(b => _bin2 += String.fromCharCode(b));
+    const content = btoa(_bin2);
     await fetch(url, {
       method: 'PUT',
       headers: { 'Authorization': 'token ' + sanitize(config.ghToken), 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
@@ -1161,7 +1235,7 @@ function saveContactForm() {
   const email = (document.getElementById('cf-email')?.value || '').trim();
   if (!name) { toast('Nom requis', 'err'); return; }
   if (!repo && !email) { toast('Dépôt ou email requis', 'err'); return; }
-  const ct = { name, email, repo: (document.getElementById('cf-repo')?.value || '').trim(), both: !!(email && (document.getElementById('cf-repo')?.value || '').trim()) };
+  const ct = { name, email, repo, both: !!(email && repo) };
   const idx = parseInt(document.getElementById('editing-contact-idx').value);
   if (idx >= 0) {
     contacts[idx] = ct;
@@ -1201,7 +1275,6 @@ function populateAssigneeSelects() {
   }
 }
 
-
 function onAssigneeChange(sel) {
   if (!sel) return;
   const editForm = document.getElementById('inline-contact-form');
@@ -1223,7 +1296,6 @@ function onAssigneeChange(sel) {
   }
 }
 
-
 function getAssigneeEmail(val) {
   if (!val || val === '--' || val === '' ) return '';
   if (val === '__me__') return '';
@@ -1234,7 +1306,7 @@ function getAssigneeEmail(val) {
     if (!ct) return '';
     return ct.email || ct.repo || '';
   }
-  return val;
+  return ''; // valeur non reconnue — sécurité
 }
 
 function getAssignedByLabel(t) {
@@ -1258,35 +1330,31 @@ function getAssigneeLabel(t) {
   return '';
 }
 
-function getContactByValue(val) {
-  if (!val) return null;
-  if (val.startsWith('__contact_') || val.startsWith('__both_')) {
-    const idx = parseInt(val.replace('__contact_', '').replace('__both_', '').replace('__', ''));
-    return contacts[idx] || null;
-  }
-  return null;
-}
-
 function clearDone() {
   const myName = PROFILES[currentProfile]?.name;
-  // Ne supprimer que ses propres tâches faites, pas celles de l'autre profil
-  const doneIds = tasks.filter(t => t.done && (t.owner === myName || !t.owner)).map(t => String(t.id));
-  if (!doneIds.length) return;
-  doneIds.forEach(id => { deleted.add(id); deletedAt.set(id, Date.now()); });
+  // Supprimer toutes les tâches faites visibles (les siennes + celles reçues qu'on peut voir)
+  const doneIds = tasks.filter(t => {
+    if (!t.done) return false;
+    // Tâche sans owner ou du profil courant → toujours supprimable
+    if (!t.owner || t.owner === myName) return true;
+    // Tâche d'un autre profil assignée aux deux → supprimable par les deux
+    if (t.assigneeRef && t.assigneeRef.startsWith('__both_')) return true;
+    return false;
+  }).map(t => String(t.id));
+  if (!doneIds.length) { toast('Aucune tâche faite', 'info'); return; }
+  const ts = Date.now();
+  doneIds.forEach(id => { deleted.add(id); deletedAt.set(id, ts); });
   localStorage.setItem('tdb_deleted', JSON.stringify([...deleted]));
-  tasks = tasks.filter(t => !(t.done && (t.owner === myName || !t.owner)));
+  localStorage.setItem('tdb_deletedAt', JSON.stringify([...deletedAt.entries()]));
+  tasks = tasks.filter(t => !doneIds.includes(String(t.id)));
   save(); renderTasks(); updateStats(); tickClock();
   toast('Tâches faites supprimées', 'ok');
 }
 
-
-
-
 async function triggerCompletionNotification(task) {
   // Quand une tâche reçue (assignedBy) est complétée, notifie l'assigneur
   if (!task.assignedBy || !config.ghToken) return;
-  // Cherche l'email de l'assigneur dans les contacts
-  // Cherche par repo, nom ou ownerName
+  // Cherche l'email de l'assigneur dans les contacts (par repo ou nom)
   const ct = contacts.find(c => 
     c.repo === task.assignedBy || 
     c.name === task.assignedBy ||
@@ -1317,7 +1385,7 @@ async function triggerCompletionNotification(task) {
   }
 }
 
-function render() { renderTasks(); updateStats(); renderLog(); populateAssigneeSelects(); }
+function render() { renderTasks(); updateStats(); }
 
 function openSettings() {
   document.getElementById('s-overlay').classList.add('open');
