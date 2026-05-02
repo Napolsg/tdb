@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.27</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.28</div>
 
 <div id="toasts"></div>
 
@@ -887,19 +887,34 @@ function toggleTask(id) {
 }
 
 async function manualRefresh() {
-  // Attend la fin d'une écriture en cours avant de lire depuis GitHub
+  // 1. Vérifie si une nouvelle version de l'app est disponible
+  try {
+    const res = await fetch(location.href, { cache: 'no-store' });
+    const html = await res.text();
+    const remoteMatch = html.match(/v(\d+\.\d+)<\/div>/);
+    const localMatch  = document.body.innerHTML.match(/v(\d+\.\d+)<\/div>/);
+    if (remoteMatch && localMatch && remoteMatch[1] !== localMatch[1]) {
+      toast('Nouvelle version v' + remoteMatch[1] + ' — rechargement…', 'ok');
+      setTimeout(() => location.reload(true), 1000);
+      return;
+    }
+  } catch(e) {}
+
+  // 2. Attend la fin d'une écriture en cours
   if (githubLock) {
     toast('Sync en cours…', 'info');
-    // Attend la fin du sync en cours, avec timeout de sécurité à 15s
     await new Promise(resolve => {
-      const timeout = setTimeout(resolve, 15000); // sécurité : résout après 15s max
+      const timeout = setTimeout(resolve, 15000);
       const interval = setInterval(() => {
         if (!githubLock) { clearInterval(interval); clearTimeout(timeout); resolve(); }
       }, 500);
     });
   }
+
   const ind = document.getElementById('sync-indicator');
   if (ind) ind.style.display = 'block';
+  // Délai pour laisser GitHub propager après une écriture récente
+  await new Promise(r => setTimeout(r, 1500));
   await syncFromGitHub(true);
   if (ind) ind.style.display = 'none';
 }
