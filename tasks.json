@@ -30,9 +30,10 @@
       "project": "",
       "assignee": "",
       "assigneeRef": "__me__",
-      "done": false,
+      "done": true,
       "created": "2026-05-02T10:23:01.621Z",
-      "owner": "Bitchoun"
+      "owner": "Bitchoun",
+      "_localModified": 1778577374722
     },
     {
       "id": 1777646713142,
