@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.28</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.29</div>
 
 <div id="toasts"></div>
 
@@ -1125,11 +1125,8 @@ function renderTasks() {
 
   const doneBar = document.getElementById('done-bar');
   if (doneBar) {
-    const myName = PROFILES[currentProfile]?.name;
-    const hasDone = tasks.some(t => t.done && (
-      !t.owner || t.owner === myName ||
-      (t.assigneeRef && t.assigneeRef.startsWith('__both_'))
-    ));
+    // Affiche le bouton si au moins une tâche visible (dans list) est faite
+    const hasDone = list.some(t => t.done);
     doneBar.style.display = hasDone ? 'block' : 'none';
   }
 
