@@ -49,13 +49,17 @@ function isTaskForProfile(task, profileKey) {
   return isOwner;
 }
 
-const raw      = JSON.parse(fs.readFileSync('tasks.json', 'utf8'));
-const allTasks = Array.isArray(raw) ? raw : (raw.tasks || []);
-const deletedIds = new Set(Array.isArray(raw) ? [] : (raw.deletedIds || []));
-const config   = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+let raw, allTasks, deletedIds;
+try {
+  raw = JSON.parse(fs.readFileSync('tasks.json', 'utf8'));
+  allTasks  = Array.isArray(raw) ? raw : (raw.tasks || []);
+  deletedIds = new Set(Array.isArray(raw) ? [] : (raw.deletedIds || []).map(String));
+} catch(e) {
+  console.error('Impossible de lire tasks.json:', e.message);
+  process.exit(1);
+}
 
-const now  = new Date();
-const repo = process.env.REPO_NAME || 'tdb';
+const now = new Date();
 
 function getTransporter(profileKey) {
   const p = PROFILES[profileKey];

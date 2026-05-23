@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.29</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.31</div>
 
 <div id="toasts"></div>
 
@@ -627,8 +627,6 @@ async function init() {
   // Sync depuis GitHub au chargement
   const ind = document.getElementById('sync-indicator');
   if (ind) ind.style.display = 'block';
-  // Petit délai pour laisser GitHub propager après une écriture récente
-  await new Promise(r => setTimeout(r, 1500));
   await syncFromGitHub(true);
   if (ind) ind.style.display = 'none';
 
@@ -740,12 +738,14 @@ async function syncFromGitHub(notify = false) {
         delete t._localModified;
       }
     });
-    const prev   = JSON.stringify(tasks);
+    // Snapshot fonctionnel avant merge (variable mémoire, pas localStorage)
+    const toCompare = t => ({ id: t.id, title: t.title, done: t.done, priority: t.priority, project: t.project, owner: t.owner, assigneeRef: t.assigneeRef });
+    const prevSnapshot = JSON.stringify(tasks.map(toCompare));
     tasks = merged;
     localStorage.setItem('tdb_tasks', JSON.stringify(tasks));
 
     render(); // toujours re-rendre pour que doneBar soit à jour
-    if (notify && JSON.stringify(tasks) !== prev) toast('Tâches synchronisées', 'ok');
+    if (notify && JSON.stringify(tasks.map(toCompare)) !== prevSnapshot) toast('Tâches synchronisées', 'ok');
   } catch(e) {
     console.warn('Sync depuis GitHub échoué:', e.message);
   }
@@ -814,15 +814,18 @@ function updateProfileDisplay() {
   const contactBtn = document.getElementById('filter-contact-btn');
   if (bothBtn)    bothBtn.textContent    = ct ? ct.name + ' et moi' : '';
   if (contactBtn) contactBtn.textContent = ct ? ct.name : '';
-  // Met aussi à jour les contacts locaux
-  contacts = [...profile.contacts];
-  localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  // Met à jour les contacts locaux seulement s'ils n'ont pas été personnalisés
+  if (!localStorage.getItem('tdb_contacts')) {
+    contacts = [...profile.contacts];
+    localStorage.setItem('tdb_contacts', JSON.stringify(contacts));
+  }
   populateAssigneeSelects();
 }
 
 function sanitize(str) {
   // Garde uniquement les caractères ASCII valides pour les headers HTTP
-  return (str || '').replace(/[^ -~]/g, '').trim();
+  // Supprime aussi tous les espaces (visibles ou invisibles) — robustesse copier-coller
+  return (str || '').replace(/\s/g, '').replace(/[^ -~]/g, '').trim();
 }
 
 function saveConfig() {
@@ -1037,7 +1040,13 @@ async function syncToGitHub() {
     const allDeletedSet = new Set(allDeleted.map(String));
     const merged = [...myLocalTasks, ...otherTasks.filter(t => !allDeletedSet.has(String(t.id)))];
 
-    const payload = { tasks: merged, deletedIds: allDeleted };
+    // Nettoie _localModified avant d'écrire sur GitHub — champ temporaire local uniquement
+    const cleanedMerged = merged.map(t => {
+      if (!t._localModified) return t;
+      const { _localModified, ...rest } = t;
+      return rest;
+    });
+    const payload = { tasks: cleanedMerged, deletedIds: allDeleted };
     const _bytes1 = new TextEncoder().encode(JSON.stringify(payload, null, 2));
     let _bin1 = ''; _bytes1.forEach(b => _bin1 += String.fromCharCode(b));
     const content = btoa(_bin1);
@@ -1175,9 +1184,11 @@ async function saveConfigToGitHub() {
       const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
       existingConfig = JSON.parse(new TextDecoder('utf-8').decode(bytes));
     } catch(e) {}
+    // Utilise les contacts du profil courant comme source de vérité
+    const profileContacts = currentProfile && PROFILES[currentProfile] ? PROFILES[currentProfile].contacts : contacts;
     const configData = {
       ...existingConfig,
-      contacts
+      contacts: profileContacts
     };
     const _bytes2 = new TextEncoder().encode(JSON.stringify(configData, null, 2));
     let _bin2 = ''; _bytes2.forEach(b => _bin2 += String.fromCharCode(b));

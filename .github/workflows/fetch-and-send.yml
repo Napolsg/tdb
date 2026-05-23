@@ -1,32 +1,24 @@
-name: Récupérer tâches et envoyer rappels
+name: Envoyer rappels email
 
 on:
   workflow_dispatch:
 
 jobs:
-  fetch-and-send:
+  send-reminders:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install imap mailparser @octokit/rest nodemailer
-      - name: Récupérer tâches par email
-        env:
-          GMAIL_USER_NAPO: ${{ secrets.GMAIL_USER_NAPO }}
-          GMAIL_PASSWORD_NAPO: ${{ secrets.GMAIL_PASSWORD_NAPO }}
-          GMAIL_USER_BITCHOUN: ${{ secrets.GMAIL_USER_BITCHOUN }}
-          GMAIL_PASSWORD_BITCHOUN: ${{ secrets.GMAIL_PASSWORD_BITCHOUN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node fetch-tasks.js
+      - run: npm install nodemailer
+      - name: Récupérer la dernière version de tasks.json
+        run: git pull --rebase
       - name: Envoyer rappels email
         env:
           GMAIL_USER_NAPO: ${{ secrets.GMAIL_USER_NAPO }}
           GMAIL_PASSWORD_NAPO: ${{ secrets.GMAIL_PASSWORD_NAPO }}
           GMAIL_USER_BITCHOUN: ${{ secrets.GMAIL_USER_BITCHOUN }}
           GMAIL_PASSWORD_BITCHOUN: ${{ secrets.GMAIL_PASSWORD_BITCHOUN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_NAME: ${{ github.event.repository.name }}
         run: node send.js
-

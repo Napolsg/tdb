@@ -29,10 +29,6 @@ const PROFILES = {
   bitchoun: { name: 'Bitchoun', email: process.env.GMAIL_USER_BITCHOUN, password: process.env.GMAIL_PASSWORD_BITCHOUN }
 };
 
-function getProfileByEmail(email) {
-  return Object.entries(PROFILES).find(([k,p]) => p.email === email)?.[0] || 'napo';
-}
-
 function getTransporter(profileKey) {
   const p = PROFILES[profileKey] || PROFILES.napo;
   return nodemailer.createTransport({ service: 'gmail', auth: { user: p.email, pass: p.password } });
@@ -126,8 +122,10 @@ function sendMail(to, subject, html, profileKey) {
     } catch(e) {}
     if (!currentConfig.notifiedTasks) currentConfig.notifiedTasks = [];
     const today = new Date().toISOString().split('T')[0];
-    // Netttoie les anciennes entrées
-    currentConfig.notifiedTasks = currentConfig.notifiedTasks.filter(n => n.date === today);
+    // Nettoie les anciennes entrées et limite à 50 max
+    currentConfig.notifiedTasks = currentConfig.notifiedTasks
+      .filter(n => n.date === today)
+      .slice(-50);
 
     let notified = false;
     for (const task of newAssigned) {
@@ -137,12 +135,6 @@ function sendMail(to, subject, html, profileKey) {
         console.log('Déjà notifié pour:', task.title);
         continue;
       }
-      // Vérifie que la tâche a bien été créée récemment (< 90s) pour éviter les vieux pushs
-      if (task.created && new Date(task.created) < new Date(Date.now() - 90 * 1000)) {
-        console.log('Tâche trop ancienne, skip:', task.title);
-        continue;
-      }
-
       const match = task.assigneeRef && task.assigneeRef.match(/__(?:contact|both)_(\d+)__/);
       if (!match) continue;
       const ctIdx = parseInt(match[1]);

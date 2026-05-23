@@ -1,7 +1,7 @@
 // Service Worker — La To Do du Bonheur
 // La version doit correspondre à celle affichée dans todo.html
 // → changer CACHE_VERSION force le rechargement sur tous les clients
-const CACHE_VERSION = 'tdb-v5.12';
+const CACHE_VERSION = 'tdb-v5.30';
 const ASSETS = [
   '/tdb/todo.html',
   '/tdb/manifest.json',

@@ -34,6 +34,8 @@ jobs:
         if: github.event_name == 'push'
         run: sleep 30
       - uses: actions/checkout@v4
+      - name: Récupérer la dernière version de tasks.json
+        run: git pull --rebase
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
