@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1780047574444,
+      "title": "Pantalon noir Côme",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-05-29T09:39:34.121Z",
+      "owner": "Bitchoun"
+    },
+    {
       "id": 1780047520782,
       "title": "Traiteur 13 juin",
       "priority": "high",
