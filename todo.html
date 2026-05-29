@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.33</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.34</div>
 
 <div id="toasts"></div>
 
@@ -1159,8 +1159,16 @@ function renderTasks() {
         <div class="task-title">${esc(t.title)}</div>
         ${t.project ? `<div class="task-project">${esc(t.project)}</div>` : ''}
 
-        ${(t.owner === (PROFILES[currentProfile]?.name) && t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') ? '<div class="task-project" style="color:#2D5BE3;">Assigné à : ' + esc(getAssigneeLabel(t)) + '</div>' : ''}
-        ${t.assignedBy ? '<div class="task-project" style="color:#2eb88a;">Assigné par : ' + esc(getAssignedByLabel(t)) + '</div>' : ''}
+        ${(t.assigneeRef && t.assigneeRef !== '__me__' && t.assigneeRef !== '') ? (() => {
+          const myName = PROFILES[currentProfile]?.name;
+          if (t.owner === myName) {
+            // Tâche créée par moi — affiche à qui elle est assignée
+            return '<div class="task-project" style="color:#2D5BE3;">Assigné à : ' + esc(getAssigneeLabel(t)) + '</div>';
+          } else {
+            // Tâche reçue — affiche qui me l'a assignée
+            return '<div class="task-project" style="color:#2eb88a;">Assigné par : ' + esc(t.owner || '') + '</div>';
+          }
+        })() : ''}
       </div>
       <button class="edit-btn" onclick="openEdit(${t.id})">✎</button>
     </div>
