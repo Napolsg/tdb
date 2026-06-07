@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1780834855443,
+      "title": "Hypnose",
+      "priority": "high",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-06-07T12:20:54.963Z",
+      "owner": "Bitchoun"
+    },
+    {
       "id": 1780047520782,
       "title": "Traiteur 13 juin",
       "priority": "high",
