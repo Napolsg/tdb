@@ -12,17 +12,6 @@
       "owner": "Napo"
     },
     {
-      "id": 1780344636958,
-      "title": "Photo Capuce",
-      "priority": "high",
-      "project": "",
-      "assignee": "mariealix.delassus@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-06-01T20:10:36.871Z",
-      "owner": "Napo"
-    },
-    {
       "id": 1777360290689,
       "title": "Crème Côme",
       "priority": "medium",
@@ -127,6 +116,7 @@
     "1778668892793",
     "1777292103620",
     "1777284394631",
-    "1780047574444"
+    "1780047574444",
+    "1780344636958"
   ]
 }
