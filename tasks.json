@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1781000790149,
+      "title": "Nettoyer jardin pour communion",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-06-09T10:26:29.928Z",
+      "owner": "Bitchoun"
+    },
+    {
       "id": 1781000730625,
       "title": "Date Départ Pyrénées ? Anniv thomithee ?",
       "priority": "medium",
