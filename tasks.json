@@ -56,17 +56,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1780047520782,
-      "title": "Traiteur 13 juin",
-      "priority": "high",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__both_0__",
-      "done": false,
-      "created": "2026-05-29T09:38:40.679Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1778668944812,
       "title": "Date dîner Somon et benoist",
       "priority": "medium",
@@ -162,6 +151,7 @@
     "1777284394631",
     "1780047574444",
     "1780344636958",
-    "1780906932153"
+    "1780906932153",
+    "1780047520782"
   ]
 }
