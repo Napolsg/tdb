@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1781218541829,
+      "title": "Classe maxou l’an prochain / classe come",
+      "priority": "high",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-06-11T22:55:41.670Z",
+      "owner": "Bitchoun"
+    },
+    {
       "id": 1781161219973,
       "title": "Pour Samedi : boissons fruits et gateau",
       "priority": "high",
