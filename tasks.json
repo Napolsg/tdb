@@ -12,17 +12,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1781000810163,
-      "title": "Coiffeur boys",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-06-09T10:26:49.811Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1781000790149,
       "title": "Nettoyer jardin pour communion",
       "priority": "medium",
@@ -163,6 +152,7 @@
     "1780047574444",
     "1780344636958",
     "1780906932153",
-    "1780047520782"
+    "1780047520782",
+    "1781000810163"
   ]
 }
