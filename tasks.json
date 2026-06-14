@@ -23,17 +23,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1781161219973,
-      "title": "Pour Samedi : boissons fruits et gateau",
-      "priority": "high",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__both_0__",
-      "done": false,
-      "created": "2026-06-11T07:00:19.726Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1781000790149,
       "title": "Nettoyer jardin pour communion",
       "priority": "medium",
@@ -175,6 +164,7 @@
     "1780344636958",
     "1780906932153",
     "1780047520782",
-    "1781000810163"
+    "1781000810163",
+    "1781161219973"
   ]
 }
