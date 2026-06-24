@@ -12,17 +12,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1781000730625,
-      "title": "Date Départ Pyrénées ? Anniv thomithee ?",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-06-09T10:25:30.134Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1781000716942,
       "title": "Maxou au relais du 6 au 9 juillet ?",
       "priority": "medium",
@@ -145,6 +134,7 @@
     "1781000810163",
     "1781161219973",
     "1781000790149",
-    "1781218541829"
+    "1781218541829",
+    "1781000730625"
   ]
 }
