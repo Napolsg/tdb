@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1782458578182,
+      "title": "Date week-end Rome Tristan +billets",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-06-26T07:22:57.604Z",
+      "owner": "Bitchoun"
+    },
+    {
       "id": 1781257368029,
       "title": "Tennis : quand ? Mercredi matin Tristan a école. Autre possibilité samedi matin pour créneau commun avec baby tennis. Sinon mercredi aprèm sans Maxou",
       "priority": "medium",
