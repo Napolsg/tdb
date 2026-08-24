@@ -78,17 +78,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1778668936468,
-      "title": "Date dîner Dinechin -en semaine",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-05-13T10:42:15.960Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1777646713142,
       "title": "Teinture short et cristaux de sel",
       "priority": "medium",
@@ -169,6 +158,7 @@
     "1781000790149",
     "1781218541829",
     "1781000730625",
-    "1781000716942"
+    "1781000716942",
+    "1778668936468"
   ]
 }
