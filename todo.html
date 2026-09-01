@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.36</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.37</div>
 
 <div id="toasts"></div>
 
@@ -1391,8 +1391,8 @@ function clearDone() {
     if (!t.done) return false;
     // Tâche sans owner ou du profil courant → toujours supprimable
     if (!t.owner || t.owner === myName) return true;
-    // Tâche d'un autre profil assignée aux deux → supprimable par les deux
-    if (t.assigneeRef && t.assigneeRef.startsWith('__both_')) return true;
+    // Tâche d'un autre profil visible par moi (assignée aux deux ou à moi) → supprimable
+    if (t.assigneeRef && (t.assigneeRef.startsWith('__both_') || t.assigneeRef.startsWith('__contact_'))) return true;
     return false;
   }).map(t => String(t.id));
   if (!doneIds.length) { toast('Aucune tâche faite', 'info'); return; }
