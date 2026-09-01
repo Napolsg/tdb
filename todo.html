@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.35</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.36</div>
 
 <div id="toasts"></div>
 
@@ -1039,11 +1039,21 @@ async function syncToGitHub() {
     // Fusionne : garde les tâches des autres profils + mes tâches mises à jour
     const profile = PROFILES[currentProfile];
     const myName = profile ? profile.name : null;
-    const otherTasks = remoteTasks.filter(t => myName && t.owner && t.owner !== myName);
+    const otherTasksRaw = remoteTasks.filter(t => myName && t.owner && t.owner !== myName);
     const allDeleted = [...new Set([...deleted, ...remoteDeletedIds])];
-    // N'inclure que MES tâches depuis le local (pas celles des autres profils
-    // qui auraient été injectées dans tasks par syncFromGitHub pour l'affichage)
+    // N'inclure que MES tâches depuis le local
     const myLocalTasks = myName ? tasks.filter(t => t.owner === myName || !t.owner) : tasks;
+    // Index des tâches locales pour propager les modifications (done, _localModified) sur les tâches de l'autre profil
+    const localById = new Map(tasks.map(t => [String(t.id), t]));
+    const now = Date.now();
+    const otherTasks = otherTasksRaw.map(t => {
+      const local = localById.get(String(t.id));
+      // Si la tâche a été modifiée localement récemment, on garde le statut local
+      if (local && local._localModified && (now - local._localModified) < 60000) {
+        return { ...t, done: local.done };
+      }
+      return t;
+    });
     const allDeletedSet = new Set(allDeleted.map(String));
     const merged = [...myLocalTasks, ...otherTasks.filter(t => !allDeletedSet.has(String(t.id)))];
 
