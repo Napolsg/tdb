@@ -1,17 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1780383185981,
-      "title": "Billet mariage Fabien",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-06-02T06:53:05.885Z",
-      "owner": "Napo"
-    },
-    {
       "id": 1777360290689,
       "title": "Crème Côme",
       "priority": "medium",
@@ -159,6 +148,7 @@
     "1781218541829",
     "1781000730625",
     "1781000716942",
-    "1778668936468"
+    "1778668936468",
+    "1780383185981"
   ]
 }
