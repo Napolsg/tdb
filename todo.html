@@ -552,7 +552,7 @@ html, body {
   <button class="sheet-btn btn-red" onclick="deleteEdit()">Supprimer la tâche</button>
 </div>
 
-<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.34</div>
+<div style="position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:0.62rem; color:#8E8E93; font-family:monospace; z-index:91; pointer-events:none;">v5.35</div>
 
 <div id="toasts"></div>
 
@@ -688,7 +688,7 @@ async function syncFromGitHub(notify = false) {
     const now = Date.now();
     const recentlyDeleted = new Set(
       [...deletedAt.entries()]
-        .filter(([id, ts]) => (now - ts) < 30000)
+        .filter(([id, ts]) => (now - ts) < 60000)
         .map(([id]) => id)
     );
 
@@ -731,7 +731,7 @@ async function syncFromGitHub(notify = false) {
     // (modifiée dans les 30 dernières secondes), on garde le statut local
     const mergedRemote = validRemote.map(t => {
       const local = localById.get(String(t.id));
-      if (local && local._localModified && (now - local._localModified) < 30000) {
+      if (local && local._localModified && (now - local._localModified) < 60000) {
         return { ...t, done: local.done, _localModified: local._localModified };
       }
       return t;
@@ -740,7 +740,7 @@ async function syncFromGitHub(notify = false) {
     const merged = [...mergedRemote, ...localOnly];
     // Nettoie les _localModified expirés (> 30s) maintenant que GitHub est à jour
     merged.forEach(t => {
-      if (t._localModified && (now - t._localModified) >= 30000) {
+      if (t._localModified && (now - t._localModified) >= 60000) {
         delete t._localModified;
       }
     });
@@ -924,7 +924,7 @@ async function manualRefresh() {
   const ind = document.getElementById('sync-indicator');
   if (ind) ind.style.display = 'block';
   // Délai pour laisser GitHub propager après une écriture récente
-  await new Promise(r => setTimeout(r, 1500));
+  await new Promise(r => setTimeout(r, 3000));
   await syncFromGitHub(true);
   if (ind) ind.style.display = 'none';
 }
