@@ -23,17 +23,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1782458661227,
-      "title": "On fait quoi en août ? Quand prends tu tes vacs ?",
-      "priority": "high",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-06-26T07:24:20.261Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1782458625489,
       "title": "Hôtel mariage fab",
       "priority": "high",
@@ -87,17 +76,6 @@
       "done": false,
       "created": "2026-05-13T10:42:24.461Z",
       "owner": "Bitchoun"
-    },
-    {
-      "id": 1777646713142,
-      "title": "Teinture short et cristaux de sel",
-      "priority": "medium",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": true,
-      "created": "2026-05-01T14:45:13.142Z",
-      "owner": "Bitchoun"
     }
   ],
   "deletedIds": [
@@ -149,6 +127,8 @@
     "1781000730625",
     "1781000716942",
     "1778668936468",
-    "1780383185981"
+    "1780383185981",
+    "1782458661227",
+    "1777646713142"
   ]
 }
