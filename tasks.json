@@ -34,17 +34,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1782458625489,
-      "title": "Hôtel mariage fab",
-      "priority": "high",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-06-26T07:23:45.057Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1782458578182,
       "title": "Date week-end Rome Tristan +billets",
       "priority": "medium",
@@ -140,6 +129,7 @@
     "1778668936468",
     "1780383185981",
     "1782458661227",
-    "1777646713142"
+    "1777646713142",
+    "1782458625489"
   ]
 }
