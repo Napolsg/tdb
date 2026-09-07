@@ -45,17 +45,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1778668944812,
-      "title": "Date dîner Somon et benoist",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-05-13T10:42:24.461Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1787997364890,
       "title": "Dentiste Tristan 4 dec",
       "priority": "medium",
@@ -198,6 +187,7 @@
     "1777646713142",
     "1782458625489",
     "1788338982614",
-    "1781257368029"
+    "1781257368029",
+    "1778668944812"
   ]
 }
