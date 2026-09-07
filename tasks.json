@@ -12,17 +12,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1787560637861,
-      "title": "Vélo tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-08-24T08:37:17.012Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1782458578182,
       "title": "week-end Rome Tristan le 4 décembre prendre billets / on dort chez Marie et Paolo ?",
       "priority": "medium",
@@ -188,6 +177,7 @@
     "1782458625489",
     "1788338982614",
     "1781257368029",
-    "1778668944812"
+    "1778668944812",
+    "1787560637861"
   ]
 }
