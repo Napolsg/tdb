@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1788956105536,
+      "title": "Inscription musique Côme",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-09-09T12:15:05.276Z",
+      "owner": "Napo"
+    },
+    {
       "id": 1788934732359,
       "title": "Appeler Decathlon",
       "priority": "medium",
