@@ -56,17 +56,6 @@
       "owner": "Napo"
     },
     {
-      "id": 1788934732359,
-      "title": "Appeler Decathlon",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-09-09T06:18:52.102Z",
-      "owner": "Napo"
-    },
-    {
       "id": 1788718925261,
       "title": "Montre Tristan",
       "priority": "medium",
@@ -200,6 +189,7 @@
     "1788338982614",
     "1781257368029",
     "1778668944812",
-    "1787560637861"
+    "1787560637861",
+    "1788934732359"
   ]
 }
