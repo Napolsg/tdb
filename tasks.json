@@ -14,10 +14,10 @@
     {
       "id": 1788764282690,
       "title": "Vacances de la Toussaint? Grande verrière ? Espagne ? Les deux ?",
-      "priority": "medium",
+      "priority": "high",
       "project": "",
       "assignee": "",
-      "assigneeRef": "__me__",
+      "assigneeRef": "__both_0__",
       "done": false,
       "created": "2026-09-07T06:58:02.389Z",
       "owner": "Bitchoun"
