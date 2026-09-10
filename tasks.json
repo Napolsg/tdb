@@ -89,17 +89,6 @@
       "owner": "Napo"
     },
     {
-      "id": 1788453499794,
-      "title": "Japon",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-09-03T16:38:19.349Z",
-      "owner": "Napo"
-    },
-    {
       "id": 1788453489984,
       "title": "Merlin Maxi",
       "priority": "medium",
@@ -190,6 +179,7 @@
     "1781257368029",
     "1778668944812",
     "1787560637861",
-    "1788934732359"
+    "1788934732359",
+    "1788453499794"
   ]
 }
