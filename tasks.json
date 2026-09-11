@@ -67,17 +67,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1787997364890,
-      "title": "Dentiste Tristan 4 dec - pourquoi le 4? On part à rome",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-08-29T09:56:04.514Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1788956105536,
       "title": "Inscription musique Côme",
       "priority": "medium",
@@ -213,6 +202,7 @@
     "1778668944812",
     "1787560637861",
     "1788934732359",
-    "1788453499794"
+    "1788453499794",
+    "1787997364890"
   ]
 }
