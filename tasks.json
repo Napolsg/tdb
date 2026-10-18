@@ -67,17 +67,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1788764282690,
-      "title": "Vacances de la Toussaint? Grande verrière ? Espagne ? Les deux ?",
-      "priority": "high",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__both_0__",
-      "done": true,
-      "created": "2026-09-07T06:58:02.389Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1782458578182,
       "title": "week-end Rome Tristan le 4 décembre prendre billets / on dort chez Marie et Paolo ?",
       "priority": "high",
@@ -217,6 +206,7 @@
     "1787997364890",
     "1788512629222",
     "1777360290689",
-    "1789153480181"
+    "1789153480181",
+    "1788764282690"
   ]
 }
