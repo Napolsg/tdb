@@ -23,17 +23,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1789550905045,
-      "title": "Révision de la voiture avant les vacs Toussaint",
-      "priority": "high",
-      "project": "",
-      "assignee": "l.lassus87@gmail.com",
-      "assigneeRef": "__contact_0__",
-      "done": false,
-      "created": "2026-09-16T09:28:24.991Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1789225597991,
       "title": "Mutuelle : droits ne fonctionnent plus pr moi. Leur écrire",
       "priority": "medium",
@@ -197,6 +186,7 @@
     "1777360290689",
     "1789153480181",
     "1788764282690",
-    "1782458578182"
+    "1782458578182",
+    "1789550905045"
   ]
 }
