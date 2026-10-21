@@ -78,17 +78,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1780834855443,
-      "title": "Hypnose",
-      "priority": "high",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-06-07T12:20:54.963Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1792413387989,
       "title": "Ophtalmologiste Côme",
       "priority": "medium",
@@ -220,6 +209,7 @@
     "1789153480181",
     "1788764282690",
     "1782458578182",
-    "1789550905045"
+    "1789550905045",
+    "1780834855443"
   ]
 }
