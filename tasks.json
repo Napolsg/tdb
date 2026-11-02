@@ -1,6 +1,17 @@
 {
   "tasks": [
     {
+      "id": 1793629172020,
+      "title": "Acheter nouvel aspi",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-11-02T14:19:31.837Z",
+      "owner": "Bitchoun"
+    },
+    {
       "id": 1793629147436,
       "title": "Virement Naïs",
       "priority": "medium",
