@@ -1,6 +1,61 @@
 {
   "tasks": [
     {
+      "id": 1792413387989,
+      "title": "Ophtalmologiste Côme",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-10-19T12:36:27.819Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1788718925261,
+      "title": "Montre Tristan",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-09-06T18:22:05.225Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1788521939524,
+      "title": "Relancer psy",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-09-04T11:38:59.404Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1788453489984,
+      "title": "Merlin Maxi",
+      "priority": "high",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-09-03T16:38:09.877Z",
+      "owner": "Napo"
+    },
+    {
+      "id": 1788453461109,
+      "title": "Commande à régler",
+      "priority": "medium",
+      "project": "",
+      "assignee": "",
+      "assigneeRef": "__me__",
+      "done": false,
+      "created": "2026-09-03T16:37:40.838Z",
+      "owner": "Napo"
+    },
+    {
       "id": 1793629172020,
       "title": "Acheter nouvel aspi",
       "priority": "medium",
@@ -175,76 +230,9 @@
       "done": false,
       "created": "2026-09-10T07:12:39.048Z",
       "owner": "Bitchoun"
-    },
-    {
-      "id": 1792413387989,
-      "title": "Ophtalmologiste Côme",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-10-19T12:36:27.819Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1788956105536,
-      "title": "Inscription musique Côme",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-09-09T12:15:05.276Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1788718925261,
-      "title": "Montre Tristan",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-09-06T18:22:05.225Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1788521939524,
-      "title": "Relancer psy",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-09-04T11:38:59.404Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1788453489984,
-      "title": "Merlin Maxi",
-      "priority": "high",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-09-03T16:38:09.877Z",
-      "owner": "Napo"
-    },
-    {
-      "id": 1788453461109,
-      "title": "Commande à régler",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-09-03T16:37:40.838Z",
-      "owner": "Napo"
     }
   ],
   "deletedIds": [
-    "1777381344112",
     "1776327292807",
     "1776328765293",
     "1776328288143",
@@ -259,6 +247,7 @@
     "1776329619280",
     "1776333783280",
     "1776330326245",
+    "1777381344112",
     "1777303089212",
     "1777382729791",
     "1776855170315",
@@ -275,9 +264,9 @@
     "1778035043100",
     "1777717381621",
     "1777996029295",
-    "1778706426449",
     "1777717386387",
     "1780046259649",
+    "1778706426449",
     "1778668892793",
     "1777292103620",
     "1777284394631",
@@ -309,6 +298,7 @@
     "1788764282690",
     "1782458578182",
     "1789550905045",
-    "1780834855443"
+    "1780834855443",
+    "1788956105536"
   ]
 }
