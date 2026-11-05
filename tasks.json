@@ -1,17 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1792413387989,
-      "title": "Ophtalmologiste Côme",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": true,
-      "created": "2026-10-19T12:36:27.819Z",
-      "owner": "Napo"
-    },
-    {
       "id": 1788718925261,
       "title": "Montre Tristan",
       "priority": "medium",
@@ -299,6 +288,7 @@
     "1782458578182",
     "1789550905045",
     "1780834855443",
-    "1788956105536"
+    "1788956105536",
+    "1792413387989"
   ]
 }
