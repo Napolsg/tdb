@@ -78,17 +78,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1790098062079,
-      "title": "Changer pile montre Tristan swatch",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-09-22T17:27:41.708Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1789225597991,
       "title": "Mutuelle : droits ne fonctionnent plus pr moi. Leur écrire",
       "priority": "medium",
@@ -240,6 +229,7 @@
     "1793629147436",
     "1792949903619",
     "1792949894480",
-    "1792430713308"
+    "1792430713308",
+    "1790098062079"
   ]
 }
