@@ -23,17 +23,6 @@
       "owner": "Bitchoun"
     },
     {
-      "id": 1792949903619,
-      "title": "Prep anniv maxi a la maison",
-      "priority": "medium",
-      "project": "",
-      "assignee": "",
-      "assigneeRef": "__me__",
-      "done": false,
-      "created": "2026-10-25T17:38:22.808Z",
-      "owner": "Bitchoun"
-    },
-    {
       "id": 1792949894480,
       "title": "Cadeaux anniv maxi",
       "priority": "medium",
@@ -270,6 +259,7 @@
     "1792413387989",
     "1788718925261",
     "1793267049204",
-    "1793629147436"
+    "1793629147436",
+    "1792949903619"
   ]
 }
